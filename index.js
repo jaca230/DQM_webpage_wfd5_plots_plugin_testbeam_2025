@@ -1,14 +1,17 @@
 import makeWFD5IntegralHistogram from './figures/WFD5IntegralHistogram.jsx';
 import makeWFD5WaveformTraces from './figures/WFD5WaveformTraces.jsx';
+import makeWFD5HodoscopePositionHistogram from './figures/WFD5HodoscopePositionHistogram.jsx';
 
 function registerFigures({ registry, baseClasses }) {
   const { Plot, SettingTypes } = baseClasses;
 
   const WFD5IntegralHistogram = makeWFD5IntegralHistogram({ Plot, SettingTypes });
   const WFD5WaveformTraces = makeWFD5WaveformTraces({ Plot, SettingTypes });
+  const WFD5HodoscopePositionHistogram = makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes }); 
 
   registry.register(WFD5IntegralHistogram.name, WFD5IntegralHistogram);
   registry.register(WFD5WaveformTraces.name, WFD5WaveformTraces);
+  registry.register(WFD5HodoscopePositionHistogram.name, WFD5HodoscopePositionHistogram); 
 }
 
 // Export for ES module import

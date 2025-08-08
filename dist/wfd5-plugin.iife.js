@@ -382,6 +382,207 @@ var PluginRegister = (function () {
     }(Plot), _defineProperty(_WFD5WaveformTraces, "displayName", 'WFD5 Waveform Traces'), _defineProperty(_WFD5WaveformTraces, "name", 'WFD5WaveformTraces'), _WFD5WaveformTraces;
   }
 
+  function makeWFD5HodoscopePositionHistogram(_ref) {
+    var _WFD5HodoscopePositionHistogram;
+    var Plot = _ref.Plot,
+      SettingTypes = _ref.SettingTypes;
+    return _WFD5HodoscopePositionHistogram = /*#__PURE__*/function (_Plot) {
+      function WFD5HodoscopePositionHistogram() {
+        _classCallCheck(this, WFD5HodoscopePositionHistogram);
+        return _callSuper(this, WFD5HodoscopePositionHistogram, arguments);
+      }
+      _inherits(WFD5HodoscopePositionHistogram, _Plot);
+      return _createClass(WFD5HodoscopePositionHistogram, [{
+        key: "extractPlotData",
+        value:
+        // Parse TH2D JSON and construct plotly heatmap + marginal histograms
+        function extractPlotData(raw) {
+          var hist = raw === null || raw === void 0 ? void 0 : raw.data;
+          if (!hist || !Array.isArray(hist.fArray)) return null;
+          var xAxis = hist.fXaxis || {};
+          var yAxis = hist.fYaxis || {};
+          var nBinsX = xAxis.fNbins;
+          var nBinsY = yAxis.fNbins;
+          if (!nBinsX || !nBinsY) return null;
+          var binEdgesX = xAxis.fXbins || this.makeLinearBins(xAxis.fXmin, xAxis.fXmax, nBinsX);
+          var binEdgesY = yAxis.fXbins || this.makeLinearBins(yAxis.fXmin, yAxis.fXmax, nBinsY);
+
+          // TH2D fArray layout: 
+          // fArray[0] = underflow, next nBinsX*nBinsY elements = bin contents, fArray end = overflow
+          // fArray length = nBinsX*nBinsY + 2 usually
+
+          // Extract 2D histogram counts from fArray ignoring underflow and overflow
+          var countsFlat = hist.fArray.slice(1, 1 + nBinsX * nBinsY);
+
+          // Reshape to 2D array [y][x] for heatmap (ROOT stores histograms in row-major order)
+          var counts2D = [];
+          for (var iy = 0; iy < nBinsY; iy++) {
+            var row = [];
+            for (var ix = 0; ix < nBinsX; ix++) {
+              row.push(countsFlat[iy * nBinsX + ix] || 0);
+            }
+            counts2D.push(row);
+          }
+
+          // Compute marginal histograms (sum counts along x and y axes)
+          var marginalX = new Array(nBinsX).fill(0);
+          var marginalY = new Array(nBinsY).fill(0);
+          for (var _iy = 0; _iy < nBinsY; _iy++) {
+            for (var _ix = 0; _ix < nBinsX; _ix++) {
+              var val = counts2D[_iy][_ix];
+              marginalX[_ix] += val;
+              marginalY[_iy] += val;
+            }
+          }
+
+          // Use bin centers for axes: centers = (edges[i] + edges[i+1]) / 2
+          var centersX = [];
+          for (var i = 0; i < nBinsX; i++) {
+            centersX.push(0.5 * (binEdgesX[i] + binEdgesX[i + 1]));
+          }
+          var centersY = [];
+          for (var _i = 0; _i < nBinsY; _i++) {
+            centersY.push(0.5 * (binEdgesY[_i] + binEdgesY[_i + 1]));
+          }
+          return {
+            heatmap: {
+              z: counts2D,
+              x: centersX,
+              y: centersY,
+              type: 'heatmap',
+              colorscale: 'Viridis',
+              colorbar: {
+                title: 'Counts'
+              },
+              hoverinfo: 'x+y+z',
+              name: '2D Histogram',
+              showscale: true
+            },
+            marginalX: {
+              x: centersX,
+              y: marginalX,
+              type: 'bar',
+              name: 'X marginal',
+              marker: {
+                color: 'steelblue'
+              }
+            },
+            marginalY: {
+              x: marginalY,
+              y: centersY,
+              type: 'bar',
+              name: 'Y marginal',
+              orientation: 'h',
+              marker: {
+                color: 'steelblue'
+              }
+            },
+            layout: {
+              grid: {
+                rows: 2,
+                columns: 2,
+                roworder: 'top to bottom',
+                subplots: [['xy', 'xMarginal'], ['yMarginal', 'empty']],
+                columnwidth: [0.7, 0.3],
+                rowheight: [0.3, 0.7],
+                xgap: 0.02,
+                ygap: 0.02
+              },
+              showlegend: false,
+              autosize: true,
+              margin: {
+                t: 30,
+                r: 30,
+                l: 40,
+                b: 40
+              },
+              // Main heatmap
+              xaxis: {
+                domain: [0, 0.7],
+                anchor: 'y'
+              },
+              yaxis: {
+                domain: [0, 0.7],
+                anchor: 'x',
+                autorange: 'reversed'
+              },
+              // X marginal on top
+              xaxis2: {
+                domain: [0, 0.7],
+                anchor: 'y2'
+              },
+              yaxis2: {
+                domain: [0.7, 1],
+                anchor: 'x2',
+                showticklabels: false
+              },
+              // Y marginal on right
+              xaxis3: {
+                domain: [0.7, 1],
+                anchor: 'y3',
+                showticklabels: false
+              },
+              yaxis3: {
+                domain: [0, 0.7],
+                anchor: 'x3'
+              }
+            }
+          };
+        }
+      }, {
+        key: "makeLinearBins",
+        value: function makeLinearBins(min, max, n) {
+          var bins = [];
+          var step = (max - min) / n;
+          for (var i = 0; i <= n; i++) bins.push(min + i * step);
+          return bins;
+        }
+      }, {
+        key: "initPlot",
+        value: function initPlot(raw) {
+          var dataObj = this.extractPlotData(raw);
+          if (!dataObj) return {
+            data: [],
+            layout: {}
+          };
+
+          // Return the traces and layout in the expected structure for multi-axes subplot
+          return {
+            data: [_objectSpread2(_objectSpread2({}, dataObj.heatmap), {}, {
+              xaxis: 'x',
+              yaxis: 'y'
+            }), _objectSpread2(_objectSpread2({}, dataObj.marginalX), {}, {
+              xaxis: 'x2',
+              yaxis: 'y2'
+            }), _objectSpread2(_objectSpread2({}, dataObj.marginalY), {}, {
+              xaxis: 'x3',
+              yaxis: 'y3'
+            })],
+            layout: dataObj.layout
+          };
+        }
+      }, {
+        key: "updatePlot",
+        value: function updatePlot(raw) {
+          return this.initPlot(raw);
+        }
+      }], [{
+        key: "settingSchema",
+        get: function get() {
+          return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
+            dataUrl: {
+              type: SettingTypes.STRING,
+              "default": 'http://localhost:8001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+              label: 'Data URL',
+              onChange: 'onUpdateTick',
+              advanced: true
+            }
+          });
+        }
+      }]);
+    }(Plot), _defineProperty(_WFD5HodoscopePositionHistogram, "displayName", 'WFD5 Hodoscope Position Histogram'), _defineProperty(_WFD5HodoscopePositionHistogram, "name", 'WFD5HodoscopePositionHistogram'), _WFD5HodoscopePositionHistogram;
+  }
+
   function registerFigures(_ref) {
     var registry = _ref.registry,
       baseClasses = _ref.baseClasses;
@@ -395,8 +596,13 @@ var PluginRegister = (function () {
       Plot: Plot,
       SettingTypes: SettingTypes
     });
+    var WFD5HodoscopePositionHistogram = makeWFD5HodoscopePositionHistogram({
+      Plot: Plot,
+      SettingTypes: SettingTypes
+    });
     registry.register(WFD5IntegralHistogram.name, WFD5IntegralHistogram);
     registry.register(WFD5WaveformTraces.name, WFD5WaveformTraces);
+    registry.register(WFD5HodoscopePositionHistogram.name, WFD5HodoscopePositionHistogram);
   }
 
   // Expose globally for IIFE/eval() based plugin loading
