@@ -1,6 +1,6 @@
 {
   "name": "wfd5_plots_2025_testbeam",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "vite.config.js",
   "scripts": {

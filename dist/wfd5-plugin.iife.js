@@ -1195,19 +1195,19 @@ var PluginRegister = (function () {
               onChange: 'onUpdateTick'
             },
             showIntegralBounds: {
-              type: SettingTypes.BOOL,
+              type: SettingTypes.BOOLEAN,
               "default": true,
               label: 'Show Integral Bounds',
               onChange: 'onUpdateTick'
             },
             showPedestal: {
-              type: SettingTypes.BOOL,
+              type: SettingTypes.BOOLEAN,
               "default": true,
               label: 'Show Pedestal',
               onChange: 'onUpdateTick'
             },
             showPedestalStdev: {
-              type: SettingTypes.BOOL,
+              type: SettingTypes.BOOLEAN,
               "default": false,
               label: 'Show Pedestal StdDev',
               onChange: 'onUpdateTick'
