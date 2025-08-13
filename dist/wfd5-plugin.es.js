@@ -3,12 +3,40 @@ function _arrayLikeToArray(r, a) {
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
+function _arrayWithHoles(r) {
+  if (Array.isArray(r)) return r;
+}
 function _arrayWithoutHoles(r) {
   if (Array.isArray(r)) return _arrayLikeToArray(r);
 }
 function _assertThisInitialized(e) {
   if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
+}
+function asyncGeneratorStep(n, t, e, r, o, a, c) {
+  try {
+    var i = n[a](c),
+      u = i.value;
+  } catch (n) {
+    return void e(n);
+  }
+  i.done ? t(u) : Promise.resolve(u).then(r, o);
+}
+function _asyncToGenerator(n) {
+  return function () {
+    var t = this,
+      e = arguments;
+    return new Promise(function (r, o) {
+      var a = n.apply(t, e);
+      function _next(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, "next", n);
+      }
+      function _throw(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, "throw", n);
+      }
+      _next(void 0);
+    });
+  };
 }
 function _callSuper(t, o, e) {
   return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e));
@@ -72,6 +100,33 @@ function _isNativeReflectConstruct() {
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
+function _iterableToArrayLimit(r, l) {
+  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+  if (null != t) {
+    var e,
+      n,
+      i,
+      u,
+      a = [],
+      f = true,
+      o = false;
+    try {
+      if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+    } catch (r) {
+      o = true, n = r;
+    } finally {
+      try {
+        if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+      } finally {
+        if (o) throw n;
+      }
+    }
+    return a;
+  }
+}
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
 function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
@@ -101,10 +156,123 @@ function _possibleConstructorReturn(t, e) {
   if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
   return _assertThisInitialized(t);
 }
+function _regenerator() {
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+  var e,
+    t,
+    r = "function" == typeof Symbol ? Symbol : {},
+    n = r.iterator || "@@iterator",
+    o = r.toStringTag || "@@toStringTag";
+  function i(r, n, o, i) {
+    var c = n && n.prototype instanceof Generator ? n : Generator,
+      u = Object.create(c.prototype);
+    return _regeneratorDefine(u, "_invoke", function (r, n, o) {
+      var i,
+        c,
+        u,
+        f = 0,
+        p = o || [],
+        y = false,
+        G = {
+          p: 0,
+          n: 0,
+          v: e,
+          a: d,
+          f: d.bind(e, 4),
+          d: function (t, r) {
+            return i = t, c = 0, u = e, G.n = r, a;
+          }
+        };
+      function d(r, n) {
+        for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) {
+          var o,
+            i = p[t],
+            d = G.p,
+            l = i[2];
+          r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0));
+        }
+        if (o || r > 1) return a;
+        throw y = true, n;
+      }
+      return function (o, p, l) {
+        if (f > 1) throw TypeError("Generator is already running");
+        for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) {
+          i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u);
+          try {
+            if (f = 2, i) {
+              if (c || (o = "next"), t = i[o]) {
+                if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
+                if (!t.done) return t;
+                u = t.value, c < 2 && (c = 0);
+              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              i = e;
+            } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
+          } catch (t) {
+            i = e, c = 1, u = t;
+          } finally {
+            f = 1;
+          }
+        }
+        return {
+          value: t,
+          done: y
+        };
+      };
+    }(r, o, i), true), u;
+  }
+  var a = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  t = Object.getPrototypeOf;
+  var c = [][n] ? t(t([][n]())) : (_regeneratorDefine(t = {}, n, function () {
+      return this;
+    }), t),
+    u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
+  function f(e) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e;
+  }
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine(u), _regeneratorDefine(u, o, "Generator"), _regeneratorDefine(u, n, function () {
+    return this;
+  }), _regeneratorDefine(u, "toString", function () {
+    return "[object Generator]";
+  }), (_regenerator = function () {
+    return {
+      w: i,
+      m: f
+    };
+  })();
+}
+function _regeneratorDefine(e, r, n, t) {
+  var i = Object.defineProperty;
+  try {
+    i({}, "", {});
+  } catch (e) {
+    i = 0;
+  }
+  _regeneratorDefine = function (e, r, n, t) {
+    if (r) i ? i(e, r, {
+      value: n,
+      enumerable: !t,
+      configurable: !t,
+      writable: !t
+    }) : e[r] = n;else {
+      function o(r, n) {
+        _regeneratorDefine(e, r, function (e) {
+          return this._invoke(r, n, e);
+        });
+      }
+      o("next", 0), o("throw", 1), o("return", 2);
+    }
+  }, _regeneratorDefine(e, r, n, t);
+}
 function _setPrototypeOf(t, e) {
   return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
     return t.__proto__ = e, t;
   }, _setPrototypeOf(t, e);
+}
+function _slicedToArray(r, e) {
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
 }
 function _superPropBase(t, o) {
   for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf(t)););
@@ -580,10 +748,478 @@ function makeWFD5HodoscopePositionHistogram(_ref) {
   }(Plot), _defineProperty(_WFD5HodoscopePositionHistogram, "displayName", 'WFD5 Hodoscope Position Histogram'), _defineProperty(_WFD5HodoscopePositionHistogram, "name", 'WFD5HodoscopePositionHistogram'), _WFD5HodoscopePositionHistogram;
 }
 
+function makeWFD5Waveform(_ref) {
+  var _WFD5Waveform;
+  var Plot = _ref.Plot,
+    SettingTypes = _ref.SettingTypes;
+  return _WFD5Waveform = /*#__PURE__*/function (_Plot) {
+    function WFD5Waveform(props) {
+      var _this;
+      _classCallCheck(this, WFD5Waveform);
+      _this = _callSuper(this, WFD5Waveform, [props]);
+      _this.state = {
+        loading: true,
+        error: null,
+        data: [],
+        layout: {},
+        revision: 0
+      };
+      return _this;
+    }
+    _inherits(WFD5Waveform, _Plot);
+    return _createClass(WFD5Waveform, [{
+      key: "fetchJson",
+      value: function () {
+        var _fetchJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url) {
+          var res;
+          return _regenerator().w(function (_context) {
+            while (1) switch (_context.n) {
+              case 0:
+                _context.n = 1;
+                return fetch(url);
+              case 1:
+                res = _context.v;
+                if (res.ok) {
+                  _context.n = 2;
+                  break;
+                }
+                throw new Error("HTTP error ".concat(res.status, " for URL ").concat(url));
+              case 2:
+                return _context.a(2, res.json());
+            }
+          }, _callee);
+        }));
+        function fetchJson(_x) {
+          return _fetchJson.apply(this, arguments);
+        }
+        return fetchJson;
+      }()
+    }, {
+      key: "onInit",
+      value: function () {
+        var _onInit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.n) {
+              case 0:
+                _context2.n = 1;
+                return this.loadData();
+              case 1:
+                return _context2.a(2);
+            }
+          }, _callee2, this);
+        }));
+        function onInit() {
+          return _onInit.apply(this, arguments);
+        }
+        return onInit;
+      }()
+    }, {
+      key: "onUpdateTick",
+      value: function () {
+        var _onUpdateTick = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+          return _regenerator().w(function (_context3) {
+            while (1) switch (_context3.n) {
+              case 0:
+                _context3.n = 1;
+                return this.loadData();
+              case 1:
+                return _context3.a(2);
+            }
+          }, _callee3, this);
+        }));
+        function onUpdateTick() {
+          return _onUpdateTick.apply(this, arguments);
+        }
+        return onUpdateTick;
+      }()
+    }, {
+      key: "loadData",
+      value: function () {
+        var _loadData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+          var _this$settings, traceDataUrl, integralDataUrl, detectorSystem, subdetector, crate, amcSlot, channel, _yield$Promise$all, _yield$Promise$all2, traceRaw, integralRaw, _this$buildTrace, traceData, actualTraceParams, _this$extractIntegral, integralInfo, actualIntegralParams, _this$composePlot, data, layout, _t;
+          return _regenerator().w(function (_context4) {
+            while (1) switch (_context4.n) {
+              case 0:
+                _this$settings = this.settings, traceDataUrl = _this$settings.traceDataUrl, integralDataUrl = _this$settings.integralDataUrl, detectorSystem = _this$settings.detectorSystem, subdetector = _this$settings.subdetector, crate = _this$settings.crate, amcSlot = _this$settings.amcSlot, channel = _this$settings.channel;
+                this.setState({
+                  loading: true,
+                  error: null
+                });
+                _context4.p = 1;
+                _context4.n = 2;
+                return Promise.all([this.fetchJson(traceDataUrl), this.fetchJson(integralDataUrl)]);
+              case 2:
+                _yield$Promise$all = _context4.v;
+                _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
+                traceRaw = _yield$Promise$all2[0];
+                integralRaw = _yield$Promise$all2[1];
+                // Try to find matching waveform and integral
+                _this$buildTrace = this.buildTrace(traceRaw, detectorSystem, subdetector, crate, amcSlot, channel), traceData = _this$buildTrace.traceData, actualTraceParams = _this$buildTrace.actualTraceParams;
+                _this$extractIntegral = this.extractIntegralInfo(integralRaw, detectorSystem, subdetector, crate, amcSlot, channel), integralInfo = _this$extractIntegral.integralInfo, actualIntegralParams = _this$extractIntegral.actualIntegralParams; // Update settings with what was actually found
+                this.updateSettingsWithActualParams(actualTraceParams || actualIntegralParams);
+                _this$composePlot = this.composePlot(traceData, integralInfo), data = _this$composePlot.data, layout = _this$composePlot.layout;
+                this.setState(function (state) {
+                  return {
+                    data: data,
+                    layout: layout,
+                    loading: false,
+                    error: null,
+                    revision: state.revision + 1
+                  };
+                });
+                _context4.n = 4;
+                break;
+              case 3:
+                _context4.p = 3;
+                _t = _context4.v;
+                this.setState({
+                  error: _t.message,
+                  loading: false
+                });
+              case 4:
+                return _context4.a(2);
+            }
+          }, _callee4, this, [[1, 3]]);
+        }));
+        function loadData() {
+          return _loadData.apply(this, arguments);
+        }
+        return loadData;
+      }()
+    }, {
+      key: "findMatchingItem",
+      value: function findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel) {
+        if (!Array.isArray(list)) return null;
+
+        // First try detector system and subdetector if provided
+        if (detectorSystem && subdetector) {
+          var _item = list.find(function (w) {
+            return w.detectorSystem === detectorSystem && w.subdetector === subdetector;
+          });
+          if (_item) {
+            return {
+              item: _item,
+              params: {
+                detectorSystem: _item.detectorSystem,
+                subdetector: _item.subdetector,
+                crate: _item.crateNum,
+                amcSlot: _item.amcNum,
+                channel: _item.channelTag
+              }
+            };
+          }
+        }
+
+        // Fallback to crate/AMC/channel
+        var item = list.find(function (w) {
+          return w.crateNum === crate && w.amcNum === amcSlot && w.channelTag === channel;
+        });
+        if (item) {
+          return {
+            item: item,
+            params: {
+              detectorSystem: item.detectorSystem || '',
+              subdetector: item.subdetector || '',
+              crate: item.crateNum,
+              amcSlot: item.amcNum,
+              channel: item.channelTag
+            }
+          };
+        }
+        return null;
+      }
+    }, {
+      key: "buildTrace",
+      value: function buildTrace(raw, detectorSystem, subdetector, crate, amcSlot, channel) {
+        var _raw$data;
+        var list = raw === null || raw === void 0 || (_raw$data = raw.data) === null || _raw$data === void 0 ? void 0 : _raw$data.arr;
+        var result = this.findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel);
+        if (!result || !Array.isArray(result.item.trace)) {
+          return {
+            traceData: null,
+            actualTraceParams: null
+          };
+        }
+        var wf = result.item;
+        var traceData = {
+          type: 'scatter',
+          mode: 'lines',
+          x: wf.trace.map(function (_, i) {
+            return i;
+          }),
+          y: wf.trace,
+          name: "".concat(wf.detectorSystem || 'N/A', " ").concat(wf.subdetector || '', " (Crate ").concat(wf.crateNum, ", AMC ").concat(wf.amcNum, ", Ch ").concat(wf.channelTag, ")"),
+          line: {
+            color: 'steelblue'
+          },
+          hoverinfo: 'x+y+name'
+        };
+        return {
+          traceData: traceData,
+          actualTraceParams: result.params
+        };
+      }
+    }, {
+      key: "extractIntegralInfo",
+      value: function extractIntegralInfo(raw, detectorSystem, subdetector, crate, amcSlot, channel) {
+        var _raw$data2;
+        var list = raw === null || raw === void 0 || (_raw$data2 = raw.data) === null || _raw$data2 === void 0 ? void 0 : _raw$data2.arr;
+        var result = this.findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel);
+        if (!result || typeof result.item.integral !== 'number') {
+          return {
+            integralInfo: null,
+            actualIntegralParams: null
+          };
+        }
+        return {
+          integralInfo: result.item,
+          actualIntegralParams: result.params
+        };
+      }
+    }, {
+      key: "updateSettingsWithActualParams",
+      value: function updateSettingsWithActualParams(params) {
+        var _this2 = this;
+        if (!params) return;
+
+        // Update settings with the actual parameters found
+        Object.keys(params).forEach(function (key) {
+          if (_this2.settings[key] !== params[key]) {
+            _this2.settings[key] = params[key];
+          }
+        });
+      }
+    }, {
+      key: "composePlot",
+      value: function composePlot(traceData, integralInfo) {
+        if (!traceData) {
+          return {
+            data: [],
+            layout: {
+              title: 'No trace data available'
+            }
+          };
+        }
+        var data = [traceData];
+        var shapes = [];
+        var annotations = [];
+
+        // Add integral bounds as vertical dashed lines
+        if (integralInfo && this.settings.showIntegralBounds && integralInfo.integration_window) {
+          var _integralInfo$integra = integralInfo.integration_window,
+            startSample = _integralInfo$integra.first,
+            endSample = _integralInfo$integra.second;
+          shapes.push({
+            type: 'line',
+            x0: startSample,
+            x1: startSample,
+            y0: 0,
+            y1: 1,
+            yref: 'paper',
+            line: {
+              color: 'red',
+              width: 2,
+              dash: 'dash'
+            }
+          }, {
+            type: 'line',
+            x0: endSample,
+            x1: endSample,
+            y0: 0,
+            y1: 1,
+            yref: 'paper',
+            line: {
+              color: 'red',
+              width: 2,
+              dash: 'dash'
+            }
+          });
+          annotations.push({
+            x: (startSample + endSample) / 2,
+            y: 1.02,
+            xref: 'x',
+            yref: 'paper',
+            text: "Integration Window: [".concat(startSample, ", ").concat(endSample, "]"),
+            showarrow: false,
+            font: {
+              size: 12,
+              color: 'red'
+            },
+            align: 'center'
+          });
+        }
+
+        // Add pedestal line
+        if (traceData && integralInfo && this.settings.showPedestal && typeof integralInfo.pedestalLevel === 'number') {
+          shapes.push({
+            type: 'line',
+            x0: 0,
+            x1: 1,
+            xref: 'paper',
+            y0: integralInfo.pedestalLevel,
+            y1: integralInfo.pedestalLevel,
+            line: {
+              color: 'green',
+              width: 2,
+              dash: 'dash'
+            }
+          });
+        }
+
+        // Add pedestal standard deviation lines
+        if (traceData && integralInfo && this.settings.showPedestalStdev && typeof integralInfo.pedestalLevel === 'number' && typeof integralInfo.pedestalStdev === 'number') {
+          var pedestal = integralInfo.pedestalLevel;
+          var stdev = integralInfo.pedestalStdev;
+          shapes.push({
+            type: 'line',
+            x0: 0,
+            x1: 1,
+            xref: 'paper',
+            y0: pedestal + stdev,
+            y1: pedestal + stdev,
+            line: {
+              color: 'lightgreen',
+              width: 1,
+              dash: 'dash'
+            }
+          }, {
+            type: 'line',
+            x0: 0,
+            x1: 1,
+            xref: 'paper',
+            y0: pedestal - stdev,
+            y1: pedestal - stdev,
+            line: {
+              color: 'lightgreen',
+              width: 1,
+              dash: 'dash'
+            }
+          });
+        }
+
+        // Add integral info annotation
+        if (integralInfo) {
+          var _integralInfo$integra2, _integralInfo$amplitu;
+          annotations.push({
+            x: 0.02,
+            y: 0.98,
+            xref: 'paper',
+            yref: 'paper',
+            text: "Integral: ".concat(((_integralInfo$integra2 = integralInfo.integral) === null || _integralInfo$integra2 === void 0 ? void 0 : _integralInfo$integra2.toFixed(2)) || 'N/A', "<br>") + "Amplitude: ".concat(((_integralInfo$amplitu = integralInfo.amplitude) === null || _integralInfo$amplitu === void 0 ? void 0 : _integralInfo$amplitu.toFixed(2)) || 'N/A', "<br>") + "Peak Time: ".concat(integralInfo.peak_time || 'N/A'),
+            showarrow: false,
+            font: {
+              size: 12,
+              color: 'black'
+            },
+            align: 'left',
+            bgcolor: 'rgba(255,255,255,0.8)',
+            bordercolor: 'black',
+            borderwidth: 1
+          });
+        }
+        var layout = {
+          autosize: true,
+          margin: {
+            t: 50,
+            r: 20,
+            l: 60,
+            b: 40
+          },
+          xaxis: {
+            title: 'Sample Number'
+          },
+          yaxis: {
+            title: 'ADC Value'
+          },
+          legend: {
+            orientation: 'h',
+            y: -0.15
+          },
+          shapes: shapes,
+          annotations: annotations
+        };
+        return {
+          data: data,
+          layout: layout
+        };
+      }
+    }], [{
+      key: "settingSchema",
+      get: function get() {
+        return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5Waveform, "settingSchema", this)), {}, {
+          traceDataUrl: {
+            type: SettingTypes.STRING,
+            "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            label: 'Trace Data URL',
+            onChange: 'onUpdateTick',
+            advanced: true
+          },
+          integralDataUrl: {
+            type: SettingTypes.STRING,
+            "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+            label: 'Integral Data URL',
+            onChange: 'onUpdateTick',
+            advanced: true
+          },
+          detectorSystem: {
+            type: SettingTypes.STRING,
+            "default": '',
+            label: 'Detector System',
+            onChange: 'onUpdateTick'
+          },
+          subdetector: {
+            type: SettingTypes.STRING,
+            "default": '',
+            label: 'Subdetector',
+            onChange: 'onUpdateTick'
+          },
+          crate: {
+            type: SettingTypes.INT,
+            "default": 0,
+            label: 'Crate #',
+            onChange: 'onUpdateTick'
+          },
+          amcSlot: {
+            type: SettingTypes.INT,
+            "default": 0,
+            label: 'AMC Slot #',
+            onChange: 'onUpdateTick'
+          },
+          channel: {
+            type: SettingTypes.INT,
+            "default": 0,
+            label: 'Channel #',
+            onChange: 'onUpdateTick'
+          },
+          showIntegralBounds: {
+            type: SettingTypes.BOOL,
+            "default": true,
+            label: 'Show Integral Bounds',
+            onChange: 'onUpdateTick'
+          },
+          showPedestal: {
+            type: SettingTypes.BOOL,
+            "default": true,
+            label: 'Show Pedestal',
+            onChange: 'onUpdateTick'
+          },
+          showPedestalStdev: {
+            type: SettingTypes.BOOL,
+            "default": false,
+            label: 'Show Pedestal StdDev',
+            onChange: 'onUpdateTick'
+          }
+        });
+      }
+    }]);
+  }(Plot), _defineProperty(_WFD5Waveform, "displayName", 'WFD5 Waveform'), _defineProperty(_WFD5Waveform, "name", 'WFD5Waveform'), _WFD5Waveform;
+}
+
 function registerFigures(_ref) {
   var registry = _ref.registry,
     baseClasses = _ref.baseClasses;
-  var Plot = baseClasses.Plot,
+  baseClasses.Figure;
+    var Plot = baseClasses.Plot,
     SettingTypes = baseClasses.SettingTypes;
   var WFD5IntegralHistogram = makeWFD5IntegralHistogram({
     Plot: Plot,
@@ -597,9 +1233,14 @@ function registerFigures(_ref) {
     Plot: Plot,
     SettingTypes: SettingTypes
   });
+  var WFD5Waveform = makeWFD5Waveform({
+    Plot: Plot,
+    SettingTypes: SettingTypes
+  });
   registry.register(WFD5IntegralHistogram.name, WFD5IntegralHistogram);
   registry.register(WFD5WaveformTraces.name, WFD5WaveformTraces);
   registry.register(WFD5HodoscopePositionHistogram.name, WFD5HodoscopePositionHistogram);
+  registry.register(WFD5Waveform.name, WFD5Waveform);
 }
 
 // Expose globally for IIFE/eval() based plugin loading
