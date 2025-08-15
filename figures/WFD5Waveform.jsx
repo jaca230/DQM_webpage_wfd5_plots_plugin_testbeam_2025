@@ -1,6 +1,6 @@
 export default function makeWFD5Waveform({ Figure, SettingTypes }) {
   return class WFD5Waveform extends Figure {
-    static displayName = 'WFD5Waveform';
+    static displayName = 'WFD5 Waveform';
     static name = 'WFD5Waveform';
 
     static get settingSchema() {

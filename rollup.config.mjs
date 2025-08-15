@@ -24,9 +24,10 @@ export default [
       globals: {
         react: 'React',
         'react-dom': 'ReactDOM',
+        'react-plotly.js': 'Plotly',
       },
     },
-    external: ['react', 'react-dom'],
+    external: ['react', 'react-dom', 'react-plotly.js'],
     plugins,
   },
   {
@@ -35,7 +36,7 @@ export default [
       file: 'dist/wfd5-plugin.es.js',
       format: 'es',
     },
-    external: ['react', 'react-dom'],
+    external: ['react', 'react-dom', 'react-plotly.js'],
     plugins,
   },
 ];

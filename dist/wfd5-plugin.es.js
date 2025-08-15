@@ -1442,7 +1442,7 @@ function makeWFD5Waveform(_ref) {
         };
       }
     }]);
-  }(Figure), _defineProperty(_WFD5Waveform, "displayName", 'WFD5Waveform'), _defineProperty(_WFD5Waveform, "name", 'WFD5Waveform'), _WFD5Waveform;
+  }(Figure), _defineProperty(_WFD5Waveform, "displayName", 'WFD5 Waveform'), _defineProperty(_WFD5Waveform, "name", 'WFD5Waveform'), _WFD5Waveform;
 }
 
 var vertices = [
