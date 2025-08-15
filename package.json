@@ -1,6 +1,6 @@
 {
   "name": "wfd5_plots_2025_testbeam",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "",
   "main": "vite.config.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "@babel/preset-react": "^7.27.1",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@vitejs/plugin-react": "^4.6.0",
     "react": "^19.1.0",

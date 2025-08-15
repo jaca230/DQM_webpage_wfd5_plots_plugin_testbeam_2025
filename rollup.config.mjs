@@ -1,6 +1,7 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
+import json from '@rollup/plugin-json';
 
 const plugins = [
   resolve(),
@@ -10,16 +11,16 @@ const plugins = [
     presets: ['@babel/preset-env', '@babel/preset-react'],
     exclude: 'node_modules/**',
   }),
+  json(),
 ];
 
 export default [
-  // Eval or script-injectable bundle
   {
     input: 'index.js',
     output: {
       file: 'dist/wfd5-plugin.iife.js',
       format: 'iife',
-      name: 'PluginRegister', // Must set this global
+      name: 'PluginRegister',
       globals: {
         react: 'React',
         'react-dom': 'ReactDOM',
@@ -28,7 +29,6 @@ export default [
     external: ['react', 'react-dom'],
     plugins,
   },
-  // ES module bundle
   {
     input: 'index.js',
     output: {

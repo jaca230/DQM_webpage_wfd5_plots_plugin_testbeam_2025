@@ -1,11 +1,11 @@
-export default function makeWFD5Waveform({ Plot, SettingTypes }) {
-  return class WFD5Waveform extends Plot {
-    static displayName = 'WFD5 Waveform';
+export default function makeWFD5Waveform({ Figure, SettingTypes }) {
+  return class WFD5Waveform extends Figure {
+    static displayName = 'WFD5Waveform';
     static name = 'WFD5Waveform';
 
     static get settingSchema() {
       return {
-        ...super.settingSchema,
+        // Data URLs
         traceDataUrl: {
           type: SettingTypes.STRING,
           default:
@@ -22,6 +22,26 @@ export default function makeWFD5Waveform({ Plot, SettingTypes }) {
           onChange: 'onUpdateTick',
           advanced: true,
         },
+
+        // Plot refresh
+        updateFrequency: {
+          type: SettingTypes.NUMBER,
+          default: 2,
+          label: 'Update Interval (s)',
+          onChange: 'onUpdateFrequencyChange',
+          advanced: false,
+        },
+
+        // Basic trace style
+        traceColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(70,130,180,1)', // steelblue
+          label: 'Trace Color',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+
+        // Detector selection
         detectorSystem: {
           type: SettingTypes.STRING,
           default: '',
@@ -52,23 +72,131 @@ export default function makeWFD5Waveform({ Plot, SettingTypes }) {
           label: 'Channel #',
           onChange: 'onUpdateTick',
         },
+
+        // Visual toggles
         showIntegralBounds: {
           type: SettingTypes.BOOLEAN,
           default: true,
           label: 'Show Integral Bounds',
-          onChange: 'onUpdateTick',
+          onChange: 'onLayoutUpdate',
+        },
+        showIntegralFill: {
+          type: SettingTypes.BOOLEAN,
+          default: true,
+          label: 'Fill Integral Region',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
         },
         showPedestal: {
           type: SettingTypes.BOOLEAN,
           default: true,
           label: 'Show Pedestal',
-          onChange: 'onUpdateTick',
+          onChange: 'onLayoutUpdate',
         },
         showPedestalStdev: {
           type: SettingTypes.BOOLEAN,
           default: false,
           label: 'Show Pedestal StdDev',
-          onChange: 'onUpdateTick',
+          onChange: 'onLayoutUpdate',
+        },
+        showIntegralInfoBox: {
+          type: SettingTypes.BOOLEAN,
+          default: true,
+          label: 'Show Integral Info Box',
+          onChange: 'onLayoutUpdate',
+        },
+
+        // Advanced visual style
+        pedestalLineColor: {
+          type: SettingTypes.COLOR,
+          default: 'black',
+          label: 'Pedestal Line Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        pedestalLineWidth: {
+          type: SettingTypes.NUMBER,
+          default: 2,
+          label: 'Pedestal Line Width',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        pedestalLineDash: {
+          type: SettingTypes.STRING,
+          default: 'dash',
+          label: 'Pedestal Line Dash',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        pedestalStdevFillColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(0,0,0,0.1)',
+          label: 'Pedestal StdDev Fill Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralLineColor: {
+          type: SettingTypes.COLOR,
+          default: 'black',
+          label: 'Integral Bound Line Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralLineWidth: {
+          type: SettingTypes.NUMBER,
+          default: 2,
+          label: 'Integral Bound Line Width',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralLineDash: {
+          type: SettingTypes.STRING,
+          default: 'dash',
+          label: 'Integral Bound Line Dash',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralFillColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(100,150,255,0.15)',
+          label: 'Integral Region Fill Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        showIntegralWindowText: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Show Integral Window Text',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralInfoBoxBgColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(255,255,255,0.8)',
+          label: 'Info Box Background Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralInfoBoxBorderColor: {
+          type: SettingTypes.COLOR,
+          default: 'black',
+          label: 'Info Box Border Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralInfoBoxX: {
+          type: SettingTypes.NUMBER,
+          default: 0.02,
+          label: 'Integral Info Box X (paper coords)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        integralInfoBoxY: {
+          type: SettingTypes.NUMBER,
+          default: 0.98,
+          label: 'Integral Info Box Y (paper coords)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
         },
       };
     }
@@ -76,12 +204,92 @@ export default function makeWFD5Waveform({ Plot, SettingTypes }) {
     constructor(props) {
       super(props);
       this.state = {
-        loading: true,
-        error: null,
         data: [],
         layout: {},
         revision: 0,
+        loading: true,
+        error: null,
       };
+      this.latestTraceRaw = null;
+      this.latestIntegralRaw = null;
+    }
+
+    async onInit() {
+      try {
+        const [traceRaw, integralRaw] = await Promise.all([
+          this.fetchJson(this.settings.traceDataUrl),
+          this.fetchJson(this.settings.integralDataUrl),
+        ]);
+        this.latestTraceRaw = traceRaw;
+        this.latestIntegralRaw = integralRaw;
+
+        const { data, layout } = this.formatPlotly(traceRaw, integralRaw);
+        this.setState({ data, layout, loading: false, error: null, revision: 0 });
+      } catch (err) {
+        this.setState({ error: err.message, loading: false });
+      }
+    }
+
+    async onUpdateTick() {
+      try {
+        const [traceRaw, integralRaw] = await Promise.all([
+          this.fetchJson(this.settings.traceDataUrl),
+          this.fetchJson(this.settings.integralDataUrl),
+        ]);
+        this.latestTraceRaw = traceRaw;
+        this.latestIntegralRaw = integralRaw;
+
+        const { data, layout: newLayout } = this.formatPlotly(traceRaw, integralRaw);
+        this.setState((prev) => ({
+          data,
+          layout: { ...prev.layout, shapes: newLayout.shapes, annotations: newLayout.annotations },
+          error: null,
+          revision: prev.revision + 1,
+        }));
+      } catch (err) {
+        this.setState({ error: err.message });
+      }
+    }
+
+    onLayoutUpdate() {
+      if (this.latestTraceRaw && this.latestIntegralRaw) {
+        const { data, layout } = this.formatPlotly(this.latestTraceRaw, this.latestIntegralRaw);
+        this.setState((prev) => ({ data, layout, revision: prev.revision + 1 }));
+      }
+    }
+
+    updateSetting(key, value) {
+      const schema = this.constructor.settingSchema[key];
+      let processedValue = value;
+
+      if (schema) {
+        switch (schema.type) {
+          case SettingTypes.NUMBER:
+            processedValue = Number(value);
+            if (isNaN(processedValue)) processedValue = schema.default;
+            break;
+          case SettingTypes.INT:
+            processedValue = parseInt(value);
+            if (isNaN(processedValue)) processedValue = schema.default;
+            break;
+          case SettingTypes.BOOLEAN:
+            processedValue = typeof value === 'string' ? value.toLowerCase() === 'true' : Boolean(value);
+            break;
+          case SettingTypes.STRING:
+          case SettingTypes.COLOR:
+            processedValue = String(value);
+            break;
+          default:
+            break;
+        }
+      }
+
+      this.settings = { ...this.settings, [key]: processedValue };
+      const onChange = schema?.onChange;
+      if (onChange === 'onUpdateTick') this.onUpdateTick();
+      else if (onChange === 'onLayoutUpdate') this.onLayoutUpdate();
+      else if (onChange === 'onUpdateFrequencyChange') this.onUpdateFrequencyChange?.(processedValue);
+      this.forceUpdate();
     }
 
     async fetchJson(url) {
@@ -90,287 +298,191 @@ export default function makeWFD5Waveform({ Plot, SettingTypes }) {
       return res.json();
     }
 
-    async onInit() {
-      await this.loadData();
-    }
+    formatPlotly(traceRaw, integralRaw) {
+      const s = this.settings;
 
-    async onUpdateTick() {
-      await this.loadData();
-    }
+      const findMatchingItem = (list) => {
+        if (!Array.isArray(list)) return { match: null, method: null };
 
-    async loadData() {
-      const { 
-        traceDataUrl, 
-        integralDataUrl, 
-        detectorSystem, 
-        subdetector, 
-        crate, 
-        amcSlot, 
-        channel 
-      } = this.settings;
-      
-      this.setState({ loading: true, error: null });
+        let match = null;
+        let method = null;
+        let settingsToUpdate = {};
 
-      try {
-        const [traceRaw, integralRaw] = await Promise.all([
-          this.fetchJson(traceDataUrl),
-          this.fetchJson(integralDataUrl),
-        ]);
-
-        // Try to find matching waveform and integral
-        const { traceData, actualTraceParams } = this.buildTrace(
-          traceRaw, 
-          detectorSystem, 
-          subdetector, 
-          crate, 
-          amcSlot, 
-          channel
-        );
-        
-        const { integralInfo, actualIntegralParams } = this.extractIntegralInfo(
-          integralRaw, 
-          detectorSystem, 
-          subdetector, 
-          crate, 
-          amcSlot, 
-          channel
-        );
-
-        // Update settings with what was actually found
-        this.updateSettingsWithActualParams(actualTraceParams || actualIntegralParams);
-
-        const { data, layout } = this.composePlot(traceData, integralInfo);
-
-        this.setState(state => ({
-          data,
-          layout,
-          loading: false,
-          error: null,
-          revision: state.revision + 1,
-        }));
-      } catch (err) {
-        this.setState({ error: err.message, loading: false });
-      }
-    }
-
-    findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel) {
-      if (!Array.isArray(list)) return null;
-
-      // First try detector system and subdetector if provided
-      if (detectorSystem && subdetector) {
-        const item = list.find(w => 
-          w.detectorSystem === detectorSystem && 
-          w.subdetector === subdetector
-        );
-        if (item) {
-          return {
-            item,
-            params: {
-              detectorSystem: item.detectorSystem,
-              subdetector: item.subdetector,
-              crate: item.crateNum,
-              amcSlot: item.amcNum,
-              channel: item.channelTag
-            }
-          };
-        }
-      }
-
-      // Fallback to crate/AMC/channel
-      const item = list.find(w =>
-        w.crateNum === crate &&
-        w.amcNum === amcSlot &&
-        w.channelTag === channel
-      );
-
-      if (item) {
-        return {
-          item,
-          params: {
-            detectorSystem: item.detectorSystem || '',
-            subdetector: item.subdetector || '',
-            crate: item.crateNum,
-            amcSlot: item.amcNum,
-            channel: item.channelTag
+        // Try detector/subdetector first
+        if (s.detectorSystem && s.subdetector) {
+          match = list.find(
+            (item) => item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector
+          );
+          if (match) {
+            method = 'detector';
+            // Sync channel info from matched item
+            const channelInfo = {
+              ...(match.crateNum != null && { crate: match.crateNum }),
+              ...(match.amcNum != null && { amcSlot: match.amcNum }),
+              ...(match.channelTag != null && { channel: match.channelTag }),
+            };
+            settingsToUpdate = { ...settingsToUpdate, ...channelInfo };
           }
+        }
+
+        // Fall back to crate/amc/channel
+        if (!match && (s.crate || s.amcSlot || s.channel)) {
+          match = list.find(
+            (item) => item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel
+          );
+          if (match) {
+            method = 'channel';
+            // Sync detector info from matched item
+            const detectorInfo = {
+              ...(match.detectorSystem && { detectorSystem: match.detectorSystem }),
+              ...(match.subdetector && { subdetector: match.subdetector }),
+            };
+            settingsToUpdate = { ...settingsToUpdate, ...detectorInfo };
+          }
+        }
+
+        // Update settings if we found complementary info
+        if (Object.keys(settingsToUpdate).length > 0) {
+          const newSettings = { ...s, ...settingsToUpdate };
+          
+          // Check if any settings actually changed to avoid infinite loops
+          const hasChanges = Object.keys(settingsToUpdate).some(
+            key => s[key] !== settingsToUpdate[key]
+          );
+          
+          if (hasChanges && typeof this.props.onSettingsCorrected === 'function') {
+            console.log(`[${this.id}] Auto-syncing settings via ${method} match:`, settingsToUpdate);
+            // Use setTimeout to avoid updating during render
+            setTimeout(() => {
+              this.props.onSettingsCorrected(newSettings);
+            }, 0);
+          }
+        }
+
+        return { match, method };
+      };
+
+      const traceList = traceRaw?.data?.arr;
+      const integralList = integralRaw?.data?.arr;
+
+      const { match: traceItem } = findMatchingItem(traceList);
+      const { match: integralItem } = findMatchingItem(integralList);
+
+      if (!traceItem || !Array.isArray(traceItem.trace)) {
+        return {
+          data: [],
+          layout: { title: 'No trace data available', autosize: true, margin: { t: 50, r: 20, l: 60, b: 40 } }
         };
       }
 
-      return null;
-    }
-
-    buildTrace(raw, detectorSystem, subdetector, crate, amcSlot, channel) {
-      const list = raw?.data?.arr;
-      const result = this.findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel);
-      
-      if (!result || !Array.isArray(result.item.trace)) {
-        return { traceData: null, actualTraceParams: null };
-      }
-
-      const wf = result.item;
       const traceData = {
         type: 'scatter',
         mode: 'lines',
-        x: wf.trace.map((_, i) => i),
-        y: wf.trace,
-        name: `${wf.detectorSystem || 'N/A'} ${wf.subdetector || ''} (Crate ${wf.crateNum}, AMC ${wf.amcNum}, Ch ${wf.channelTag})`,
-        line: { color: 'steelblue' },
+        x: traceItem.trace.map((_, i) => i),
+        y: traceItem.trace,
+        name: `${traceItem.detectorSystem || 'N/A'} ${traceItem.subdetector || ''} (Crate ${traceItem.crateNum}, AMC ${traceItem.amcNum}, Ch ${traceItem.channelTag})`,
+        line: { color: s.traceColor },
         hoverinfo: 'x+y+name',
       };
 
-      return { traceData, actualTraceParams: result.params };
-    }
-
-    extractIntegralInfo(raw, detectorSystem, subdetector, crate, amcSlot, channel) {
-      const list = raw?.data?.arr;
-      const result = this.findMatchingItem(list, detectorSystem, subdetector, crate, amcSlot, channel);
-      
-      if (!result || typeof result.item.integral !== 'number') {
-        return { integralInfo: null, actualIntegralParams: null };
-      }
-
-      return { integralInfo: result.item, actualIntegralParams: result.params };
-    }
-
-    updateSettingsWithActualParams(params) {
-      if (!params) return;
-      
-      // Update settings with the actual parameters found
-      Object.keys(params).forEach(key => {
-        if (this.settings[key] !== params[key]) {
-          this.settings[key] = params[key];
-        }
-      });
-    }
-
-    composePlot(traceData, integralInfo) {
-      if (!traceData) {
-        return {
-          data: [],
-          layout: { title: 'No trace data available' },
-        };
-      }
-
-      const data = [traceData];
       const shapes = [];
       const annotations = [];
 
-      // Add integral bounds as vertical dashed lines
-      if (integralInfo && this.settings.showIntegralBounds && integralInfo.integration_window) {
-        const { first: startSample, second: endSample } = integralInfo.integration_window;
-        
-        shapes.push(
-          {
-            type: 'line',
-            x0: startSample,
-            x1: startSample,
-            y0: 0,
-            y1: 1,
-            yref: 'paper',
-            line: {
-              color: 'red',
-              width: 2,
-              dash: 'dash'
-            }
-          },
-          {
-            type: 'line',
-            x0: endSample,
-            x1: endSample,
-            y0: 0,
-            y1: 1,
-            yref: 'paper',
-            line: {
-              color: 'red',
-              width: 2,
-              dash: 'dash'
-            }
-          }
-        );
+      if (integralItem && s.showIntegralBounds) {
+        const { first: startSample, second: endSample } = integralItem.integration_window || {};
 
-        annotations.push({
-          x: (startSample + endSample) / 2,
-          y: 1.02,
-          xref: 'x',
-          yref: 'paper',
-          text: `Integration Window: [${startSample}, ${endSample}]`,
-          showarrow: false,
-          font: { size: 12, color: 'red' },
-          align: 'center',
-        });
+        if (startSample != null && endSample != null) {
+          if (s.showIntegralFill) {
+            shapes.push({
+              type: 'rect',
+              xref: 'x',
+              x0: startSample,
+              x1: endSample,
+              yref: 'y',
+              y0: Math.min(...traceItem.trace),
+              y1: Math.max(...traceItem.trace),
+              fillcolor: s.integralFillColor,
+              line: { width: 0 },
+            });
+          }
+
+          shapes.push(
+            {
+              type: 'line',
+              x0: startSample,
+              x1: startSample,
+              y0: Math.min(...traceItem.trace),
+              y1: Math.max(...traceItem.trace),
+              line: { color: s.integralLineColor, width: s.integralLineWidth, dash: s.integralLineDash },
+            },
+            {
+              type: 'line',
+              x0: endSample,
+              x1: endSample,
+              y0: Math.min(...traceItem.trace),
+              y1: Math.max(...traceItem.trace),
+              line: { color: s.integralLineColor, width: s.integralLineWidth, dash: s.integralLineDash },
+            }
+          );
+
+          if (s.showIntegralWindowText) {
+            annotations.push({
+              x: (startSample + endSample) / 2,
+              y: 1.02,
+              xref: 'x',
+              yref: 'paper',
+              text: `Integration Window: [${startSample}, ${endSample}]`,
+              showarrow: false,
+              font: { size: 12, color: s.integralLineColor },
+              align: 'center',
+            });
+          }
+        }
       }
 
-      // Add pedestal line
-      if (traceData && integralInfo && this.settings.showPedestal && 
-          typeof integralInfo.pedestalLevel === 'number') {
+      if (integralItem && s.showPedestal && typeof integralItem.pedestalLevel === 'number') {
         shapes.push({
           type: 'line',
           x0: 0,
           x1: 1,
           xref: 'paper',
-          y0: integralInfo.pedestalLevel,
-          y1: integralInfo.pedestalLevel,
-          line: {
-            color: 'green',
-            width: 2,
-            dash: 'dash'
-          }
+          y0: integralItem.pedestalLevel,
+          y1: integralItem.pedestalLevel,
+          line: { color: s.pedestalLineColor, width: s.pedestalLineWidth, dash: s.pedestalLineDash },
         });
       }
 
-      // Add pedestal standard deviation lines
-      if (traceData && integralInfo && this.settings.showPedestalStdev && 
-          typeof integralInfo.pedestalLevel === 'number' &&
-          typeof integralInfo.pedestalStdev === 'number') {
-        const pedestal = integralInfo.pedestalLevel;
-        const stdev = integralInfo.pedestalStdev;
-        
-        shapes.push(
-          {
-            type: 'line',
-            x0: 0,
-            x1: 1,
-            xref: 'paper',
-            y0: pedestal + stdev,
-            y1: pedestal + stdev,
-            line: {
-              color: 'lightgreen',
-              width: 1,
-              dash: 'dash'
-            }
-          },
-          {
-            type: 'line',
-            x0: 0,
-            x1: 1,
-            xref: 'paper',
-            y0: pedestal - stdev,
-            y1: pedestal - stdev,
-            line: {
-              color: 'lightgreen',
-              width: 1,
-              dash: 'dash'
-            }
-          }
-        );
+      if (integralItem && s.showPedestalStdev && typeof integralItem.pedestalStdev === 'number') {
+        const pedestal = integralItem.pedestalLevel;
+        const stdev = integralItem.pedestalStdev;
+        shapes.push({
+          type: 'rect',
+          xref: 'paper',
+          x0: 0,
+          x1: 1,
+          y0: pedestal - stdev,
+          y1: pedestal + stdev,
+          fillcolor: s.pedestalStdevFillColor,
+          line: { width: 0 },
+        });
       }
 
-      // Add integral info annotation
-      if (integralInfo) {
+      if (integralItem && s.showIntegralInfoBox) {
         annotations.push({
-          x: 0.02,
-          y: 0.98,
+          x: s.integralInfoBoxX,
+          y: s.integralInfoBoxY,
           xref: 'paper',
           yref: 'paper',
-          text: `Integral: ${integralInfo.integral?.toFixed(2) || 'N/A'}<br>` +
-                `Amplitude: ${integralInfo.amplitude?.toFixed(2) || 'N/A'}<br>` +
-                `Peak Time: ${integralInfo.peak_time || 'N/A'}`,
+          text:
+            `Integral: ${integralItem.integral?.toFixed(2) || 'N/A'}<br>` +
+            `Amplitude: ${integralItem.amplitude?.toFixed(2) || 'N/A'}<br>` +
+            `Peak Time: ${integralItem.peak_time || 'N/A'}`,
           showarrow: false,
           font: { size: 12, color: 'black' },
           align: 'left',
-          bgcolor: 'rgba(255,255,255,0.8)',
-          bordercolor: 'black',
-          borderwidth: 1
+          bgcolor: s.integralInfoBoxBgColor,
+          bordercolor: s.integralInfoBoxBorderColor,
+          borderwidth: 1,
         });
       }
 
@@ -384,7 +496,29 @@ export default function makeWFD5Waveform({ Plot, SettingTypes }) {
         annotations,
       };
 
-      return { data, layout };
+      return { data: [traceData], layout };
     }
-  };
+
+
+    render() {
+      const { data, layout, revision, loading, error } = this.state;
+
+      return (
+        <div className="no-drag" style={{ width: '100%', height: '100%' }}>
+          {loading && <p>Loading...</p>}
+          {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+          {!loading && !error && (
+            <Plotly
+              data={data}
+              layout={layout}
+              revision={revision}
+              style={{ width: '100%', height: '100%' }}
+              useResizeHandler
+              config={{ responsive: true, modeBarButtonsToRemove: ['select2d', 'lasso2d'] }}
+            />
+          )}
+        </div>
+      );
+    }
+  }
 }

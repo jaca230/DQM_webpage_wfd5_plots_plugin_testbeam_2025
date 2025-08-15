@@ -1,20 +1,23 @@
 import makeWFD5IntegralHistogram from './figures/WFD5IntegralHistogram.jsx';
-import makeWFD5WaveformTraces from './figures/WFD5WaveformTraces.jsx';
 import makeWFD5HodoscopePositionHistogram from './figures/WFD5HodoscopePositionHistogram.jsx';
 import makeWFD5Waveform from './figures/WFD5Waveform.jsx';
+import makeWFD5LysoArrayHistograms from './figures/WFD5LysoArrayHistograms.jsx';
+import makeWFD5LysoArrayWaveforms from './figures/WFD5LysoArrayWaveforms.jsx';
+import makeWFD5WaveformTraceOnly from './figures/WFD5WaveformTraceOnly.jsx';
 
 function registerFigures({ registry, baseClasses }) {
   const { Figure, Plot, SettingTypes } = baseClasses;
 
-  const WFD5IntegralHistogram = makeWFD5IntegralHistogram({ Plot, SettingTypes });
-  const WFD5WaveformTraces = makeWFD5WaveformTraces({ Plot, SettingTypes });
-  const WFD5HodoscopePositionHistogram = makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes });
-  const WFD5Waveform = makeWFD5Waveform({ Figure, Plot, SettingTypes });
+  const figures = [
+    makeWFD5IntegralHistogram({ Figure, Plot, SettingTypes }),
+    makeWFD5HodoscopePositionHistogram({ Figure, Plot, SettingTypes }),
+    makeWFD5Waveform({ Figure, Plot, SettingTypes }),
+    makeWFD5LysoArrayHistograms({ Figure, Plot, SettingTypes }),
+    makeWFD5LysoArrayWaveforms({ Figure, Plot, SettingTypes }),
+    makeWFD5WaveformTraceOnly({ Figure, Plot, SettingTypes }),
+  ];
 
-  registry.register(WFD5IntegralHistogram.name, WFD5IntegralHistogram);
-  registry.register(WFD5WaveformTraces.name, WFD5WaveformTraces);
-  registry.register(WFD5HodoscopePositionHistogram.name, WFD5HodoscopePositionHistogram);
-  registry.register(WFD5Waveform.name, WFD5Waveform);
+  figures.forEach(fig => registry.register(fig.name, fig));
 }
 
 // Export for ES module import
