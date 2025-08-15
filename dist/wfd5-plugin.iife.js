@@ -3332,6 +3332,7 @@ var PluginRegister = (function () {
           if (!Array.isArray(list)) return null;
           var s = this.settings;
           var wf = null;
+          var settingsToUpdate = {};
 
           // Try detector/subdetector first
           if (s.detectorSystem && s.subdetector) {
@@ -3340,14 +3341,14 @@ var PluginRegister = (function () {
             });
             if (wf) {
               // Update crate/amc/channel from matched item
-              var updates = {};
-              if (wf.crateNum != null) updates.crate = wf.crateNum;
-              if (wf.amcNum != null) updates.amcSlot = wf.amcNum;
-              if (wf.channelTag != null) updates.channel = wf.channelTag;
-              if (Object.keys(updates).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
-                setTimeout(function () {
-                  return _this.props.onSettingsCorrected(_objectSpread2(_objectSpread2({}, s), updates));
-                }, 0);
+              if (wf.crateNum != null && s.crate !== wf.crateNum) {
+                settingsToUpdate.crate = wf.crateNum;
+              }
+              if (wf.amcNum != null && s.amcSlot !== wf.amcNum) {
+                settingsToUpdate.amcSlot = wf.amcNum;
+              }
+              if (wf.channelTag != null && s.channel !== wf.channelTag) {
+                settingsToUpdate.channel = wf.channelTag;
               }
             }
           }
@@ -3359,15 +3360,23 @@ var PluginRegister = (function () {
             });
             if (wf) {
               // Update detector/subdetector from matched item
-              var _updates = {};
-              if (wf.detectorSystem) _updates.detectorSystem = wf.detectorSystem;
-              if (wf.subdetector) _updates.subdetector = wf.subdetector;
-              if (Object.keys(_updates).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
-                setTimeout(function () {
-                  return _this.props.onSettingsCorrected(_objectSpread2(_objectSpread2({}, s), _updates));
-                }, 0);
+              if (wf.detectorSystem && s.detectorSystem !== wf.detectorSystem) {
+                settingsToUpdate.detectorSystem = wf.detectorSystem;
+              }
+              if (wf.subdetector && s.subdetector !== wf.subdetector) {
+                settingsToUpdate.subdetector = wf.subdetector;
               }
             }
+          }
+
+          // Only update settings if there are actual changes
+          if (Object.keys(settingsToUpdate).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
+            var newSettings = _objectSpread2(_objectSpread2({}, s), settingsToUpdate);
+            console.log("[".concat(this.id || 'WFD5Trace', "] Auto-syncing settings:"), settingsToUpdate);
+            // Use setTimeout to avoid updating during render
+            setTimeout(function () {
+              return _this.props.onSettingsCorrected(newSettings);
+            }, 0);
           }
           if (!wf) return null;
           return {
