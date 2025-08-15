@@ -90,6 +90,7 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
       const s = this.settings;
 
       let wf = null;
+      let settingsToUpdate = {};
 
       // Try detector/subdetector first
       if (s.detectorSystem && s.subdetector) {
@@ -102,13 +103,14 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
 
         if (wf) {
           // Update crate/amc/channel from matched item
-          const updates = {};
-          if (wf.crateNum != null) updates.crate = wf.crateNum;
-          if (wf.amcNum != null) updates.amcSlot = wf.amcNum;
-          if (wf.channelTag != null) updates.channel = wf.channelTag;
-
-          if (Object.keys(updates).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
-            setTimeout(() => this.props.onSettingsCorrected({ ...s, ...updates }), 0);
+          if (wf.crateNum != null && s.crate !== wf.crateNum) {
+            settingsToUpdate.crate = wf.crateNum;
+          }
+          if (wf.amcNum != null && s.amcSlot !== wf.amcNum) {
+            settingsToUpdate.amcSlot = wf.amcNum;
+          }
+          if (wf.channelTag != null && s.channel !== wf.channelTag) {
+            settingsToUpdate.channel = wf.channelTag;
           }
         }
       }
@@ -125,14 +127,21 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
 
         if (wf) {
           // Update detector/subdetector from matched item
-          const updates = {};
-          if (wf.detectorSystem) updates.detectorSystem = wf.detectorSystem;
-          if (wf.subdetector) updates.subdetector = wf.subdetector;
-
-          if (Object.keys(updates).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
-            setTimeout(() => this.props.onSettingsCorrected({ ...s, ...updates }), 0);
+          if (wf.detectorSystem && s.detectorSystem !== wf.detectorSystem) {
+            settingsToUpdate.detectorSystem = wf.detectorSystem;
+          }
+          if (wf.subdetector && s.subdetector !== wf.subdetector) {
+            settingsToUpdate.subdetector = wf.subdetector;
           }
         }
+      }
+
+      // Only update settings if there are actual changes
+      if (Object.keys(settingsToUpdate).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
+        const newSettings = { ...s, ...settingsToUpdate };
+        console.log(`[${this.id || 'WFD5Trace'}] Auto-syncing settings:`, settingsToUpdate);
+        // Use setTimeout to avoid updating during render
+        setTimeout(() => this.props.onSettingsCorrected(newSettings), 0);
       }
 
       if (!wf) return null;
