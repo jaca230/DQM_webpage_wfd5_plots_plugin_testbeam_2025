@@ -13,7 +13,134 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
           onChange: 'onUpdateTick',
           advanced: true,
         },
+        
+        // Visual settings
+        showColorbar: {
+          type: SettingTypes.BOOLEAN,
+          default: true,
+          label: 'Show Colorbar',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        heatmapColorscale: {
+          type: SettingTypes.STRING,
+          default: 'Viridis',
+          label: 'Heatmap Color Scheme',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        marginalBarColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(70,130,180,1)',
+          label: 'Marginal Bar Color',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        
+        // Log scale settings
+        heatmapLogScale: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Heatmap Log Scale',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        xMarginalLogScale: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'X Marginal Log Scale',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        yMarginalLogScale: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Y Marginal Log Scale',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
+        
+        // Axis orientation settings
+        swapXY: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Swap X and Y Axes',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        flipXAxis: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Flip X Axis (bugged, requires refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        flipYAxis: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Flip Y Axis (bugged, requires refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        
+        // Layout settings
+        marginalWidth: {
+          type: SettingTypes.NUMBER,
+          default: 0.25,
+          label: 'Marginal Plot Width (fraction)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        marginalHeight: {
+          type: SettingTypes.NUMBER,
+          default: 0.25,
+          label: 'Marginal Plot Height (fraction)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        plotGap: {
+          type: SettingTypes.NUMBER,
+          default: 0.02,
+          label: 'Plot Gap',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        
+        // Advanced visual settings
+        heatmapOpacity: {
+          type: SettingTypes.NUMBER,
+          default: 1.0,
+          label: 'Heatmap Opacity',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        marginalBarOpacity: {
+          type: SettingTypes.NUMBER,
+          default: 0.8,
+          label: 'Marginal Bar Opacity',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        showMarginalOutlines: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Show Marginal Bar Outlines',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        marginalOutlineColor: {
+          type: SettingTypes.COLOR,
+          default: "rgba(0,0,0,1)",
+          label: 'Marginal Outline Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
       };
+    }
+
+    constructor(props) {
+      super(props);
+      this.cachedData = null; // Cache parsed data for layout-only updates
     }
 
     // Parse TH2D JSON and construct plotly heatmap + marginal histograms
@@ -34,8 +161,6 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
 
       // TH2D fArray layout: 
       // fArray[0] = underflow, next nBinsX*nBinsY elements = bin contents, fArray end = overflow
-      // fArray length = nBinsX*nBinsY + 2 usually
-
       // Extract 2D histogram counts from fArray ignoring underflow and overflow
       const countsFlat = hist.fArray.slice(1, 1 + nBinsX * nBinsY);
 
@@ -71,51 +196,13 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
       }
 
       return { 
-        heatmap: {
-          z: counts2D,
-          x: centersX,
-          y: centersY,
-          type: 'heatmap',
-          colorscale: 'Viridis',
-          colorbar: { title: 'Counts' },
-          hoverinfo: 'x+y+z',
-          name: '2D Histogram',
-          showscale: true,
-        },
-        marginalX: {
-          x: centersX,
-          y: marginalX,
-          type: 'bar',
-          name: 'X marginal',
-          marker: { color: 'steelblue' },
-        },
-        marginalY: {
-          x: marginalY,
-          y: centersY,
-          type: 'bar',
-          name: 'Y marginal',
-          orientation: 'h',
-          marker: { color: 'steelblue' },
-        },
-        layout: {
-          grid: { rows: 2, columns: 2, roworder: 'top to bottom', 
-                  subplots: [['xy', 'xMarginal'], ['yMarginal', 'empty']],
-                  columnwidth: [0.7, 0.3], rowheight: [0.3, 0.7], 
-                  xgap: 0.02, ygap: 0.02,
-          },
-          showlegend: false,
-          autosize: true,
-          margin: { t: 30, r: 30, l: 40, b: 40 },
-          // Main heatmap
-          xaxis: { domain: [0, 0.7], anchor: 'y' },
-          yaxis: { domain: [0, 0.7], anchor: 'x', autorange: 'reversed' },
-          // X marginal on top
-          xaxis2: { domain: [0, 0.7], anchor: 'y2' },
-          yaxis2: { domain: [0.7, 1], anchor: 'x2', showticklabels: false },
-          // Y marginal on right
-          xaxis3: { domain: [0.7, 1], anchor: 'y3', showticklabels: false },
-          yaxis3: { domain: [0, 0.7], anchor: 'x3' },
-        }
+        counts2D,
+        centersX,
+        centersY,
+        marginalX,
+        marginalY,
+        nBinsX,
+        nBinsY,
       };
     }
 
@@ -126,23 +213,201 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
       return bins;
     }
 
+    buildPlotlyData() {
+      if (!this.cachedData) return { data: [], layout: {} };
+
+      const { counts2D, centersX, centersY, marginalX, marginalY } = this.cachedData;
+      const s = this.settings;
+
+      // Handle X/Y swapping
+      let heatmapX = centersX;
+      let heatmapY = centersY;
+      let heatmapZ = counts2D;
+      let marginalXData = marginalX;
+      let marginalYData = marginalY;
+      let marginalXCenters = centersX;
+      let marginalYCenters = centersY;
+
+      if (s.swapXY) {
+        // Swap axes: transpose the heatmap data and swap marginals
+        heatmapX = centersY;
+        heatmapY = centersX;
+        // Transpose the 2D array
+        heatmapZ = counts2D[0].map((_, colIndex) => counts2D.map(row => row[colIndex]));
+        // Swap marginal data
+        marginalXData = marginalY;
+        marginalYData = marginalX;
+        marginalXCenters = centersY;
+        marginalYCenters = centersX;
+      }
+
+      // Apply log scaling to heatmap if requested
+      if (s.heatmapLogScale) {
+        heatmapZ = heatmapZ.map(row => 
+          row.map(val => val > 0 ? Math.log10(val) : null)
+        );
+      }
+
+      // Apply log scaling to marginals if requested
+      if (s.xMarginalLogScale) {
+        marginalXData = marginalXData.map(val => val > 0 ? Math.log10(val) : null);
+      }
+      if (s.yMarginalLogScale) {
+        marginalYData = marginalYData.map(val => val > 0 ? Math.log10(val) : null);
+      }
+
+      const heatmap = {
+        z: heatmapZ,
+        x: heatmapX,
+        y: heatmapY,
+        type: 'heatmap',
+        colorscale: s.heatmapColorscale,
+        colorbar: s.showColorbar ? { 
+          title: s.heatmapLogScale ? 'log₁₀(Counts)' : 'Counts',
+          titleside: 'right'
+        } : null,
+        showscale: s.showColorbar,
+        hovertemplate: (s.swapXY ? 'Y' : 'X') + ': %{x}<br>' + 
+                      (s.swapXY ? 'X' : 'Y') + ': %{y}<br>' + 
+                      (s.heatmapLogScale ? 'log₁₀(Counts)' : 'Counts') + 
+                      ': %{z}<extra></extra>',
+        name: '2D Histogram',
+        xaxis: 'x',
+        yaxis: 'y',
+        opacity: s.heatmapOpacity,
+      };
+
+      const marginalXTrace = {
+        x: marginalXCenters,
+        y: marginalXData,
+        type: 'bar',
+        name: (s.swapXY ? 'Y' : 'X') + ' marginal',
+        marker: { 
+          color: s.marginalBarColor,
+          opacity: s.marginalBarOpacity,
+          line: s.showMarginalOutlines ? {
+            color: s.marginalOutlineColor,
+            width: 1
+          } : undefined
+        },
+        hovertemplate: (s.swapXY ? 'Y' : 'X') + ': %{x}<br>' + 
+                      (s.xMarginalLogScale ? 'log₁₀(Counts)' : 'Counts') + 
+                      ': %{y}<extra></extra>',
+        xaxis: 'x2',
+        yaxis: 'y2',
+      };
+
+      const marginalYTrace = {
+        x: marginalYData,
+        y: marginalYCenters,
+        type: 'bar',
+        name: (s.swapXY ? 'X' : 'Y') + ' marginal',
+        orientation: 'h',
+        marker: { 
+          color: s.marginalBarColor,
+          opacity: s.marginalBarOpacity,
+          line: s.showMarginalOutlines ? {
+            color: s.marginalOutlineColor,
+            width: 1
+          } : undefined
+        },
+        hovertemplate: (s.swapXY ? 'X' : 'Y') + ': %{y}<br>' + 
+                      (s.yMarginalLogScale ? 'log₁₀(Counts)' : 'Counts') + 
+                      ': %{x}<extra></extra>',
+        xaxis: 'x3',
+        yaxis: 'y3',
+      };
+
+      // Calculate layout dimensions
+      const mainWidth = 1.0 - s.marginalWidth - s.plotGap;
+      const mainHeight = 1.0 - s.marginalHeight - s.plotGap;
+
+      const layout = {
+        showlegend: false,
+        autosize: true,
+        margin: { t: 30, r: 30, l: 40, b: 40 },
+        
+        // Main heatmap (bottom-left)
+        xaxis: { 
+          domain: [0, mainWidth], 
+          anchor: 'y',
+          title: (s.swapXY ? 'Y' : 'X') + ' Position',
+          autorange: s.flipXAxis ? 'reversed' : true,
+        },
+        yaxis: { 
+          domain: [0, mainHeight], 
+          anchor: 'x',
+          title: (s.swapXY ? 'X' : 'Y') + ' Position',
+          autorange: s.flipYAxis ? 'reversed' : true,
+        },
+        
+        // X marginal (top)
+        xaxis2: { 
+          domain: [0, mainWidth], 
+          anchor: 'y2',
+          showticklabels: false,
+          matches: 'x' // Ensure X axes are synchronized
+        },
+        yaxis2: { 
+          domain: [mainHeight + s.plotGap, 1], 
+          anchor: 'x2',
+          title: s.xMarginalLogScale ? 'log₁₀(Counts)' : 'Counts',
+        },
+        
+        // Y marginal (right)
+        xaxis3: { 
+          domain: [mainWidth + s.plotGap, 1], 
+          anchor: 'y3',
+          title: s.yMarginalLogScale ? 'log₁₀(Counts)' : 'Counts',
+        },
+        yaxis3: { 
+          domain: [0, mainHeight], 
+          anchor: 'x3',
+          showticklabels: false,
+          matches: 'y' // Ensure Y axes are synchronized
+        },
+        
+        // Background color for better visual separation
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white',
+      };
+
+      return {
+        data: [heatmap, marginalXTrace, marginalYTrace],
+        layout,
+      };
+    }
+
     initPlot(raw) {
       const dataObj = this.extractPlotData(raw);
       if (!dataObj) return { data: [], layout: {} };
 
-      // Return the traces and layout in the expected structure for multi-axes subplot
-      return {
-        data: [
-          { ...dataObj.heatmap, xaxis: 'x', yaxis: 'y' },
-          { ...dataObj.marginalX, xaxis: 'x2', yaxis: 'y2' },
-          { ...dataObj.marginalY, xaxis: 'x3', yaxis: 'y3' },
-        ],
-        layout: dataObj.layout,
-      };
+      this.cachedData = dataObj;
+      return this.buildPlotlyData();
     }
 
     updatePlot(raw) {
-      return this.initPlot(raw);
+      // Only update data if the raw data has changed
+      const dataObj = this.extractPlotData(raw);
+      if (!dataObj) return { data: [], layout: undefined };
+
+      this.cachedData = dataObj;
+      
+      // For updatePlot, we only return new data, not layout
+      const { data } = this.buildPlotlyData();
+      return { data, layout: undefined };
     }
-  };
+
+    onLayoutUpdate() {
+      // Use cached data to rebuild with new layout settings
+      if (this.cachedData) {
+        const { data, layout } = this.buildPlotlyData();
+        this.setState(prev => ({
+          data,
+          layout,
+          revision: prev.revision + 1
+        }));
+      }
+    }
+  }
 }

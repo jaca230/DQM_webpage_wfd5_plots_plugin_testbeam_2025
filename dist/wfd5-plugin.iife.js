@@ -589,16 +589,19 @@ var PluginRegister = (function () {
     var Plot = _ref.Plot,
       SettingTypes = _ref.SettingTypes;
     return _WFD5HodoscopePositionHistogram = /*#__PURE__*/function (_Plot) {
-      function WFD5HodoscopePositionHistogram() {
+      function WFD5HodoscopePositionHistogram(props) {
+        var _this;
         _classCallCheck(this, WFD5HodoscopePositionHistogram);
-        return _callSuper(this, WFD5HodoscopePositionHistogram, arguments);
+        _this = _callSuper(this, WFD5HodoscopePositionHistogram, [props]);
+        _this.cachedData = null; // Cache parsed data for layout-only updates
+        return _this;
       }
+
+      // Parse TH2D JSON and construct plotly heatmap + marginal histograms
       _inherits(WFD5HodoscopePositionHistogram, _Plot);
       return _createClass(WFD5HodoscopePositionHistogram, [{
         key: "extractPlotData",
-        value:
-        // Parse TH2D JSON and construct plotly heatmap + marginal histograms
-        function extractPlotData(raw) {
+        value: function extractPlotData(raw) {
           var hist = raw === null || raw === void 0 ? void 0 : raw.data;
           if (!hist || !Array.isArray(hist.fArray)) return null;
           var xAxis = hist.fXaxis || {};
@@ -611,8 +614,6 @@ var PluginRegister = (function () {
 
           // TH2D fArray layout: 
           // fArray[0] = underflow, next nBinsX*nBinsY elements = bin contents, fArray end = overflow
-          // fArray length = nBinsX*nBinsY + 2 usually
-
           // Extract 2D histogram counts from fArray ignoring underflow and overflow
           var countsFlat = hist.fArray.slice(1, 1 + nBinsX * nBinsY);
 
@@ -647,88 +648,13 @@ var PluginRegister = (function () {
             centersY.push(0.5 * (binEdgesY[_i] + binEdgesY[_i + 1]));
           }
           return {
-            heatmap: {
-              z: counts2D,
-              x: centersX,
-              y: centersY,
-              type: 'heatmap',
-              colorscale: 'Viridis',
-              colorbar: {
-                title: 'Counts'
-              },
-              hoverinfo: 'x+y+z',
-              name: '2D Histogram',
-              showscale: true
-            },
-            marginalX: {
-              x: centersX,
-              y: marginalX,
-              type: 'bar',
-              name: 'X marginal',
-              marker: {
-                color: 'steelblue'
-              }
-            },
-            marginalY: {
-              x: marginalY,
-              y: centersY,
-              type: 'bar',
-              name: 'Y marginal',
-              orientation: 'h',
-              marker: {
-                color: 'steelblue'
-              }
-            },
-            layout: {
-              grid: {
-                rows: 2,
-                columns: 2,
-                roworder: 'top to bottom',
-                subplots: [['xy', 'xMarginal'], ['yMarginal', 'empty']],
-                columnwidth: [0.7, 0.3],
-                rowheight: [0.3, 0.7],
-                xgap: 0.02,
-                ygap: 0.02
-              },
-              showlegend: false,
-              autosize: true,
-              margin: {
-                t: 30,
-                r: 30,
-                l: 40,
-                b: 40
-              },
-              // Main heatmap
-              xaxis: {
-                domain: [0, 0.7],
-                anchor: 'y'
-              },
-              yaxis: {
-                domain: [0, 0.7],
-                anchor: 'x',
-                autorange: 'reversed'
-              },
-              // X marginal on top
-              xaxis2: {
-                domain: [0, 0.7],
-                anchor: 'y2'
-              },
-              yaxis2: {
-                domain: [0.7, 1],
-                anchor: 'x2',
-                showticklabels: false
-              },
-              // Y marginal on right
-              xaxis3: {
-                domain: [0.7, 1],
-                anchor: 'y3',
-                showticklabels: false
-              },
-              yaxis3: {
-                domain: [0, 0.7],
-                anchor: 'x3'
-              }
-            }
+            counts2D: counts2D,
+            centersX: centersX,
+            centersY: centersY,
+            marginalX: marginalX,
+            marginalY: marginalY,
+            nBinsX: nBinsX,
+            nBinsY: nBinsY
           };
         }
       }, {
@@ -740,6 +666,177 @@ var PluginRegister = (function () {
           return bins;
         }
       }, {
+        key: "buildPlotlyData",
+        value: function buildPlotlyData() {
+          if (!this.cachedData) return {
+            data: [],
+            layout: {}
+          };
+          var _this$cachedData = this.cachedData,
+            counts2D = _this$cachedData.counts2D,
+            centersX = _this$cachedData.centersX,
+            centersY = _this$cachedData.centersY,
+            marginalX = _this$cachedData.marginalX,
+            marginalY = _this$cachedData.marginalY;
+          var s = this.settings;
+
+          // Handle X/Y swapping
+          var heatmapX = centersX;
+          var heatmapY = centersY;
+          var heatmapZ = counts2D;
+          var marginalXData = marginalX;
+          var marginalYData = marginalY;
+          var marginalXCenters = centersX;
+          var marginalYCenters = centersY;
+          if (s.swapXY) {
+            // Swap axes: transpose the heatmap data and swap marginals
+            heatmapX = centersY;
+            heatmapY = centersX;
+            // Transpose the 2D array
+            heatmapZ = counts2D[0].map(function (_, colIndex) {
+              return counts2D.map(function (row) {
+                return row[colIndex];
+              });
+            });
+            // Swap marginal data
+            marginalXData = marginalY;
+            marginalYData = marginalX;
+            marginalXCenters = centersY;
+            marginalYCenters = centersX;
+          }
+
+          // Apply log scaling to heatmap if requested
+          if (s.heatmapLogScale) {
+            heatmapZ = heatmapZ.map(function (row) {
+              return row.map(function (val) {
+                return val > 0 ? Math.log10(val) : null;
+              });
+            });
+          }
+
+          // Apply log scaling to marginals if requested
+          if (s.xMarginalLogScale) {
+            marginalXData = marginalXData.map(function (val) {
+              return val > 0 ? Math.log10(val) : null;
+            });
+          }
+          if (s.yMarginalLogScale) {
+            marginalYData = marginalYData.map(function (val) {
+              return val > 0 ? Math.log10(val) : null;
+            });
+          }
+          var heatmap = {
+            z: heatmapZ,
+            x: heatmapX,
+            y: heatmapY,
+            type: 'heatmap',
+            colorscale: s.heatmapColorscale,
+            colorbar: s.showColorbar ? {
+              title: s.heatmapLogScale ? 'log₁₀(Counts)' : 'Counts',
+              titleside: 'right'
+            } : null,
+            showscale: s.showColorbar,
+            hovertemplate: (s.swapXY ? 'Y' : 'X') + ': %{x}<br>' + (s.swapXY ? 'X' : 'Y') + ': %{y}<br>' + (s.heatmapLogScale ? 'log₁₀(Counts)' : 'Counts') + ': %{z}<extra></extra>',
+            name: '2D Histogram',
+            xaxis: 'x',
+            yaxis: 'y',
+            opacity: s.heatmapOpacity
+          };
+          var marginalXTrace = {
+            x: marginalXCenters,
+            y: marginalXData,
+            type: 'bar',
+            name: (s.swapXY ? 'Y' : 'X') + ' marginal',
+            marker: {
+              color: s.marginalBarColor,
+              opacity: s.marginalBarOpacity,
+              line: s.showMarginalOutlines ? {
+                color: s.marginalOutlineColor,
+                width: 1
+              } : undefined
+            },
+            hovertemplate: (s.swapXY ? 'Y' : 'X') + ': %{x}<br>' + (s.xMarginalLogScale ? 'log₁₀(Counts)' : 'Counts') + ': %{y}<extra></extra>',
+            xaxis: 'x2',
+            yaxis: 'y2'
+          };
+          var marginalYTrace = {
+            x: marginalYData,
+            y: marginalYCenters,
+            type: 'bar',
+            name: (s.swapXY ? 'X' : 'Y') + ' marginal',
+            orientation: 'h',
+            marker: {
+              color: s.marginalBarColor,
+              opacity: s.marginalBarOpacity,
+              line: s.showMarginalOutlines ? {
+                color: s.marginalOutlineColor,
+                width: 1
+              } : undefined
+            },
+            hovertemplate: (s.swapXY ? 'X' : 'Y') + ': %{y}<br>' + (s.yMarginalLogScale ? 'log₁₀(Counts)' : 'Counts') + ': %{x}<extra></extra>',
+            xaxis: 'x3',
+            yaxis: 'y3'
+          };
+
+          // Calculate layout dimensions
+          var mainWidth = 1.0 - s.marginalWidth - s.plotGap;
+          var mainHeight = 1.0 - s.marginalHeight - s.plotGap;
+          var layout = {
+            showlegend: false,
+            autosize: true,
+            margin: {
+              t: 30,
+              r: 30,
+              l: 40,
+              b: 40
+            },
+            // Main heatmap (bottom-left)
+            xaxis: {
+              domain: [0, mainWidth],
+              anchor: 'y',
+              title: (s.swapXY ? 'Y' : 'X') + ' Position',
+              autorange: s.flipXAxis ? 'reversed' : true
+            },
+            yaxis: {
+              domain: [0, mainHeight],
+              anchor: 'x',
+              title: (s.swapXY ? 'X' : 'Y') + ' Position',
+              autorange: s.flipYAxis ? 'reversed' : true
+            },
+            // X marginal (top)
+            xaxis2: {
+              domain: [0, mainWidth],
+              anchor: 'y2',
+              showticklabels: false,
+              matches: 'x' // Ensure X axes are synchronized
+            },
+            yaxis2: {
+              domain: [mainHeight + s.plotGap, 1],
+              anchor: 'x2',
+              title: s.xMarginalLogScale ? 'log₁₀(Counts)' : 'Counts'
+            },
+            // Y marginal (right)
+            xaxis3: {
+              domain: [mainWidth + s.plotGap, 1],
+              anchor: 'y3',
+              title: s.yMarginalLogScale ? 'log₁₀(Counts)' : 'Counts'
+            },
+            yaxis3: {
+              domain: [0, mainHeight],
+              anchor: 'x3',
+              showticklabels: false,
+              matches: 'y' // Ensure Y axes are synchronized
+            },
+            // Background color for better visual separation
+            plot_bgcolor: 'white',
+            paper_bgcolor: 'white'
+          };
+          return {
+            data: [heatmap, marginalXTrace, marginalYTrace],
+            layout: layout
+          };
+        }
+      }, {
         key: "initPlot",
         value: function initPlot(raw) {
           var dataObj = this.extractPlotData(raw);
@@ -747,26 +844,44 @@ var PluginRegister = (function () {
             data: [],
             layout: {}
           };
-
-          // Return the traces and layout in the expected structure for multi-axes subplot
-          return {
-            data: [_objectSpread2(_objectSpread2({}, dataObj.heatmap), {}, {
-              xaxis: 'x',
-              yaxis: 'y'
-            }), _objectSpread2(_objectSpread2({}, dataObj.marginalX), {}, {
-              xaxis: 'x2',
-              yaxis: 'y2'
-            }), _objectSpread2(_objectSpread2({}, dataObj.marginalY), {}, {
-              xaxis: 'x3',
-              yaxis: 'y3'
-            })],
-            layout: dataObj.layout
-          };
+          this.cachedData = dataObj;
+          return this.buildPlotlyData();
         }
       }, {
         key: "updatePlot",
         value: function updatePlot(raw) {
-          return this.initPlot(raw);
+          // Only update data if the raw data has changed
+          var dataObj = this.extractPlotData(raw);
+          if (!dataObj) return {
+            data: [],
+            layout: undefined
+          };
+          this.cachedData = dataObj;
+
+          // For updatePlot, we only return new data, not layout
+          var _this$buildPlotlyData = this.buildPlotlyData(),
+            data = _this$buildPlotlyData.data;
+          return {
+            data: data,
+            layout: undefined
+          };
+        }
+      }, {
+        key: "onLayoutUpdate",
+        value: function onLayoutUpdate() {
+          // Use cached data to rebuild with new layout settings
+          if (this.cachedData) {
+            var _this$buildPlotlyData2 = this.buildPlotlyData(),
+              data = _this$buildPlotlyData2.data,
+              layout = _this$buildPlotlyData2.layout;
+            this.setState(function (prev) {
+              return {
+                data: data,
+                layout: layout,
+                revision: prev.revision + 1
+              };
+            });
+          }
         }
       }], [{
         key: "settingSchema",
@@ -777,6 +892,123 @@ var PluginRegister = (function () {
               "default": 'http://localhost:8001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
               label: 'Data URL',
               onChange: 'onUpdateTick',
+              advanced: true
+            },
+            // Visual settings
+            showColorbar: {
+              type: SettingTypes.BOOLEAN,
+              "default": true,
+              label: 'Show Colorbar',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            heatmapColorscale: {
+              type: SettingTypes.STRING,
+              "default": 'Viridis',
+              label: 'Heatmap Color Scheme',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            marginalBarColor: {
+              type: SettingTypes.COLOR,
+              "default": 'rgba(70,130,180,1)',
+              label: 'Marginal Bar Color',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            // Log scale settings
+            heatmapLogScale: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Heatmap Log Scale',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            xMarginalLogScale: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'X Marginal Log Scale',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            yMarginalLogScale: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Y Marginal Log Scale',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            // Axis orientation settings
+            swapXY: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Swap X and Y Axes',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            flipXAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Flip X Axis (bugged, requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            flipYAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Flip Y Axis (bugged, requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            // Layout settings
+            marginalWidth: {
+              type: SettingTypes.NUMBER,
+              "default": 0.25,
+              label: 'Marginal Plot Width (fraction)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            marginalHeight: {
+              type: SettingTypes.NUMBER,
+              "default": 0.25,
+              label: 'Marginal Plot Height (fraction)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            plotGap: {
+              type: SettingTypes.NUMBER,
+              "default": 0.02,
+              label: 'Plot Gap',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            // Advanced visual settings
+            heatmapOpacity: {
+              type: SettingTypes.NUMBER,
+              "default": 1.0,
+              label: 'Heatmap Opacity',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            marginalBarOpacity: {
+              type: SettingTypes.NUMBER,
+              "default": 0.8,
+              label: 'Marginal Bar Opacity',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            showMarginalOutlines: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Show Marginal Bar Outlines',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            marginalOutlineColor: {
+              type: SettingTypes.COLOR,
+              "default": "rgba(0,0,0,1)",
+              label: 'Marginal Outline Color',
+              onChange: 'onLayoutUpdate',
               advanced: true
             }
           });
@@ -875,7 +1107,8 @@ var PluginRegister = (function () {
                       data: data,
                       layout: _objectSpread2(_objectSpread2({}, prev.layout), {}, {
                         shapes: newLayout.shapes,
-                        annotations: newLayout.annotations
+                        annotations: newLayout.annotations,
+                        yaxis: newLayout.yaxis
                       }),
                       error: null,
                       revision: prev.revision + 1
@@ -1066,13 +1299,23 @@ var PluginRegister = (function () {
               }
             };
           }
+
+          // Process trace data - subtract pedestal if enabled
+          var processedTrace = _toConsumableArray(traceItem.trace);
+          var adjustedPedestalLevel = integralItem === null || integralItem === void 0 ? void 0 : integralItem.pedestalLevel;
+          if (s.subtractPedestal && integralItem && typeof integralItem.pedestalLevel === 'number') {
+            processedTrace = traceItem.trace.map(function (value) {
+              return value - integralItem.pedestalLevel;
+            });
+            adjustedPedestalLevel = 0; // Pedestal line should be at zero when subtracted
+          }
           var traceData = {
             type: 'scatter',
             mode: 'lines',
             x: traceItem.trace.map(function (_, i) {
               return i;
             }),
-            y: traceItem.trace,
+            y: processedTrace,
             name: "".concat(traceItem.detectorSystem || 'N/A', " ").concat(traceItem.subdetector || '', " (Crate ").concat(traceItem.crateNum, ", AMC ").concat(traceItem.amcNum, ", Ch ").concat(traceItem.channelTag, ")"),
             line: {
               color: s.traceColor
@@ -1086,6 +1329,8 @@ var PluginRegister = (function () {
               startSample = _ref2.first,
               endSample = _ref2.second;
             if (startSample != null && endSample != null) {
+              var yMin = Math.min.apply(Math, _toConsumableArray(processedTrace));
+              var yMax = Math.max.apply(Math, _toConsumableArray(processedTrace));
               if (s.showIntegralFill) {
                 shapes.push({
                   type: 'rect',
@@ -1093,8 +1338,8 @@ var PluginRegister = (function () {
                   x0: startSample,
                   x1: endSample,
                   yref: 'y',
-                  y0: Math.min.apply(Math, _toConsumableArray(traceItem.trace)),
-                  y1: Math.max.apply(Math, _toConsumableArray(traceItem.trace)),
+                  y0: yMin,
+                  y1: yMax,
                   fillcolor: s.integralFillColor,
                   line: {
                     width: 0
@@ -1105,8 +1350,8 @@ var PluginRegister = (function () {
                 type: 'line',
                 x0: startSample,
                 x1: startSample,
-                y0: Math.min.apply(Math, _toConsumableArray(traceItem.trace)),
-                y1: Math.max.apply(Math, _toConsumableArray(traceItem.trace)),
+                y0: yMin,
+                y1: yMax,
                 line: {
                   color: s.integralLineColor,
                   width: s.integralLineWidth,
@@ -1116,8 +1361,8 @@ var PluginRegister = (function () {
                 type: 'line',
                 x0: endSample,
                 x1: endSample,
-                y0: Math.min.apply(Math, _toConsumableArray(traceItem.trace)),
-                y1: Math.max.apply(Math, _toConsumableArray(traceItem.trace)),
+                y0: yMin,
+                y1: yMax,
                 line: {
                   color: s.integralLineColor,
                   width: s.integralLineWidth,
@@ -1141,14 +1386,14 @@ var PluginRegister = (function () {
               }
             }
           }
-          if (integralItem && s.showPedestal && typeof integralItem.pedestalLevel === 'number') {
+          if (integralItem && s.showPedestal && typeof adjustedPedestalLevel === 'number') {
             shapes.push({
               type: 'line',
               x0: 0,
               x1: 1,
               xref: 'paper',
-              y0: integralItem.pedestalLevel,
-              y1: integralItem.pedestalLevel,
+              y0: adjustedPedestalLevel,
+              y1: adjustedPedestalLevel,
               line: {
                 color: s.pedestalLineColor,
                 width: s.pedestalLineWidth,
@@ -1157,7 +1402,7 @@ var PluginRegister = (function () {
             });
           }
           if (integralItem && s.showPedestalStdev && typeof integralItem.pedestalStdev === 'number') {
-            var pedestal = integralItem.pedestalLevel;
+            var pedestal = adjustedPedestalLevel;
             var stdev = integralItem.pedestalStdev;
             shapes.push({
               type: 'rect',
@@ -1191,6 +1436,17 @@ var PluginRegister = (function () {
               borderwidth: 1
             });
           }
+
+          // Configure Y-axis based on fixYAxis setting
+          var yaxis = {
+            title: 'ADC Value'
+          };
+          if (s.fixYAxis) {
+            yaxis.range = [s.yAxisMin, s.yAxisMax];
+            yaxis.autorange = false;
+          } else {
+            yaxis.autorange = true;
+          }
           var layout = {
             autosize: true,
             margin: {
@@ -1202,9 +1458,7 @@ var PluginRegister = (function () {
             xaxis: {
               title: 'Sample Number'
             },
-            yaxis: {
-              title: 'ADC Value'
-            },
+            yaxis: yaxis,
             legend: {
               orientation: 'h',
               y: -0.15
@@ -1349,6 +1603,37 @@ var PluginRegister = (function () {
               "default": true,
               label: 'Show Integral Info Box',
               onChange: 'onLayoutUpdate'
+            },
+            // Y axis settings
+            subtractPedestal: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Subtract Pedestal',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            fixYAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Fix Y Axis Range',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            yAxisMin: {
+              type: SettingTypes.NUMBER,
+              "default": -2048,
+              // -2^11
+              label: 'Y Axis Min',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            yAxisMax: {
+              type: SettingTypes.NUMBER,
+              "default": 2048,
+              // 2^11
+              label: 'Y Axis Max',
+              onChange: 'onLayoutUpdate',
+              advanced: true
             },
             // Advanced visual style
             pedestalLineColor: {
@@ -2424,14 +2709,14 @@ var PluginRegister = (function () {
   }
 
   function makeWFD5LysoArrayWaveforms(_ref) {
-    var _WFD5SoccerBallLysoArray;
+    var _WFD5LysoArrayWaveforms;
     var Figure = _ref.Figure,
       SettingTypes = _ref.SettingTypes;
-    return _WFD5SoccerBallLysoArray = /*#__PURE__*/function (_Figure) {
-      function WFD5SoccerBallLysoArray(props) {
+    return _WFD5LysoArrayWaveforms = /*#__PURE__*/function (_Figure) {
+      function WFD5LysoArrayWaveforms(props) {
         var _this;
-        _classCallCheck(this, WFD5SoccerBallLysoArray);
-        _this = _callSuper(this, WFD5SoccerBallLysoArray, [props]);
+        _classCallCheck(this, WFD5LysoArrayWaveforms);
+        _this = _callSuper(this, WFD5LysoArrayWaveforms, [props]);
         _this.state = {
           tracesData: [],
           plotlyData: [],
@@ -2444,8 +2729,8 @@ var PluginRegister = (function () {
         _this.latestIntegralRaw = null;
         return _this;
       }
-      _inherits(WFD5SoccerBallLysoArray, _Figure);
-      return _createClass(WFD5SoccerBallLysoArray, [{
+      _inherits(WFD5LysoArrayWaveforms, _Figure);
+      return _createClass(WFD5LysoArrayWaveforms, [{
         key: "onInit",
         value: function () {
           var _onInit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
@@ -2559,6 +2844,36 @@ var PluginRegister = (function () {
               };
             });
           }
+        }
+      }, {
+        key: "updateSetting",
+        value: function updateSetting(key, value) {
+          var _this$onUpdateFrequen;
+          var schema = this.constructor.settingSchema[key];
+          var processedValue = value;
+          if (schema) {
+            switch (schema.type) {
+              case SettingTypes.NUMBER:
+                processedValue = Number(value);
+                if (isNaN(processedValue)) processedValue = schema["default"];
+                break;
+              case SettingTypes.INT:
+                processedValue = parseInt(value);
+                if (isNaN(processedValue)) processedValue = schema["default"];
+                break;
+              case SettingTypes.BOOLEAN:
+                processedValue = typeof value === 'string' ? value.toLowerCase() === 'true' : Boolean(value);
+                break;
+              case SettingTypes.STRING:
+              case SettingTypes.COLOR:
+                processedValue = String(value);
+                break;
+            }
+          }
+          this.settings = _objectSpread2(_objectSpread2({}, this.settings), {}, _defineProperty({}, key, processedValue));
+          var onChange = schema === null || schema === void 0 ? void 0 : schema.onChange;
+          if (onChange === 'onUpdateTick') this.onUpdateTick();else if (onChange === 'onLayoutUpdate') this.onLayoutUpdate();else if (onChange === 'onUpdateFrequencyChange') (_this$onUpdateFrequen = this.onUpdateFrequencyChange) === null || _this$onUpdateFrequen === void 0 || _this$onUpdateFrequen.call(this, processedValue);
+          this.forceUpdate();
         }
       }, {
         key: "processTraceData",
@@ -2702,19 +3017,31 @@ var PluginRegister = (function () {
             integralInfoBoxBorderColor = _this$settings3.integralInfoBoxBorderColor,
             integralInfoBoxX = _this$settings3.integralInfoBoxX,
             integralInfoBoxY = _this$settings3.integralInfoBoxY,
-            showSubplotLabels = _this$settings3.showSubplotLabels;
+            showSubplotLabels = _this$settings3.showSubplotLabels,
+            subtractPedestal = _this$settings3.subtractPedestal,
+            fixYAxis = _this$settings3.fixYAxis,
+            yAxisMin = _this$settings3.yAxisMin,
+            yAxisMax = _this$settings3.yAxisMax;
           var positions = this.getSoccerBallPositions();
           var plotlyTraces = [];
           var shapes = [];
           var annotations = [];
           tracesData.forEach(function (item, i) {
             if (!item || !item.traceItem || !Array.isArray(item.traceItem.trace) || i >= positions.length) return;
-
-            //const pos = positions[i];
             var traceItem = item.traceItem,
               integralItem = item.integralItem;
             var trace = traceItem.trace;
             var color = traceColors[i % traceColors.length];
+
+            // Process trace data - subtract pedestal if enabled (global setting)
+            var processedTrace = _toConsumableArray(trace);
+            var adjustedPedestalLevel = integralItem === null || integralItem === void 0 ? void 0 : integralItem.pedestalLevel;
+            if (subtractPedestal && integralItem && typeof integralItem.pedestalLevel === 'number') {
+              processedTrace = trace.map(function (value) {
+                return value - integralItem.pedestalLevel;
+              });
+              adjustedPedestalLevel = 0; // Pedestal line should be at zero when subtracted
+            }
 
             // Main trace
             plotlyTraces.push({
@@ -2723,7 +3050,7 @@ var PluginRegister = (function () {
               x: trace.map(function (_, idx) {
                 return idx;
               }),
-              y: trace,
+              y: processedTrace,
               line: {
                 color: color
               },
@@ -2759,6 +3086,8 @@ var PluginRegister = (function () {
                   startSample = _integralItem$integra.first,
                   endSample = _integralItem$integra.second;
                 if (startSample != null && endSample != null) {
+                  var yMin = Math.min.apply(Math, _toConsumableArray(processedTrace));
+                  var yMax = Math.max.apply(Math, _toConsumableArray(processedTrace));
                   if (showIntegralFill) {
                     shapes.push({
                       type: 'rect',
@@ -2766,8 +3095,8 @@ var PluginRegister = (function () {
                       yref: "y".concat(i + 1),
                       x0: startSample,
                       x1: endSample,
-                      y0: Math.min.apply(Math, _toConsumableArray(trace)),
-                      y1: Math.max.apply(Math, _toConsumableArray(trace)),
+                      y0: yMin,
+                      y1: yMax,
                       fillcolor: integralFillColor,
                       line: {
                         width: 0
@@ -2780,8 +3109,8 @@ var PluginRegister = (function () {
                     yref: "y".concat(i + 1),
                     x0: startSample,
                     x1: startSample,
-                    y0: Math.min.apply(Math, _toConsumableArray(trace)),
-                    y1: Math.max.apply(Math, _toConsumableArray(trace)),
+                    y0: yMin,
+                    y1: yMax,
                     line: {
                       color: integralLineColor,
                       width: integralLineWidth,
@@ -2793,8 +3122,8 @@ var PluginRegister = (function () {
                     yref: "y".concat(i + 1),
                     x0: endSample,
                     x1: endSample,
-                    y0: Math.min.apply(Math, _toConsumableArray(trace)),
-                    y1: Math.max.apply(Math, _toConsumableArray(trace)),
+                    y0: yMin,
+                    y1: yMax,
                     line: {
                       color: integralLineColor,
                       width: integralLineWidth,
@@ -2804,7 +3133,7 @@ var PluginRegister = (function () {
                   if (showIntegralWindowText) {
                     annotations.push({
                       x: (startSample + endSample) / 2,
-                      y: Math.max.apply(Math, _toConsumableArray(trace)),
+                      y: yMax,
                       xref: "x".concat(i + 1),
                       yref: "y".concat(i + 1),
                       text: "[".concat(startSample, "-").concat(endSample, "]"),
@@ -2818,16 +3147,16 @@ var PluginRegister = (function () {
                 }
               }
 
-              // Pedestal line + stdev
-              if (showPedestal && typeof integralItem.pedestalLevel === 'number') {
+              // Pedestal line + stdev (use adjusted pedestal level)
+              if (showPedestal && typeof adjustedPedestalLevel === 'number') {
                 shapes.push({
                   type: 'line',
                   xref: "x".concat(i + 1),
                   yref: "y".concat(i + 1),
                   x0: 0,
                   x1: trace.length - 1,
-                  y0: integralItem.pedestalLevel,
-                  y1: integralItem.pedestalLevel,
+                  y0: adjustedPedestalLevel,
+                  y1: adjustedPedestalLevel,
                   line: {
                     color: pedestalLineColor,
                     width: pedestalLineWidth,
@@ -2841,8 +3170,8 @@ var PluginRegister = (function () {
                     yref: "y".concat(i + 1),
                     x0: 0,
                     x1: trace.length - 1,
-                    y0: integralItem.pedestalLevel - integralItem.pedestalStdev,
-                    y1: integralItem.pedestalLevel + integralItem.pedestalStdev,
+                    y0: adjustedPedestalLevel - integralItem.pedestalStdev,
+                    y1: adjustedPedestalLevel + integralItem.pedestalStdev,
                     fillcolor: pedestalStdevFillColor,
                     line: {
                       width: 0
@@ -2898,6 +3227,23 @@ var PluginRegister = (function () {
               var yDomain = [clampedY - subplotSize / 2, clampedY + subplotSize / 2];
               var xAxisKey = i === 0 ? 'xaxis' : "xaxis".concat(i + 1);
               var yAxisKey = i === 0 ? 'yaxis' : "yaxis".concat(i + 1);
+
+              // Configure Y-axis based on global fixYAxis setting
+              var yAxisConfig = {
+                domain: yDomain,
+                anchor: "x".concat(i + 1),
+                showgrid: true,
+                gridcolor: 'rgba(128,128,128,0.2)',
+                showticklabels: true,
+                zeroline: true,
+                title: ''
+              };
+              if (fixYAxis) {
+                yAxisConfig.range = [yAxisMin, yAxisMax];
+                yAxisConfig.autorange = false;
+              } else {
+                yAxisConfig.autorange = true;
+              }
               layout[xAxisKey] = {
                 domain: xDomain,
                 anchor: "y".concat(i + 1),
@@ -2907,15 +3253,7 @@ var PluginRegister = (function () {
                 zeroline: true,
                 title: ''
               };
-              layout[yAxisKey] = {
-                domain: yDomain,
-                anchor: "x".concat(i + 1),
-                showgrid: true,
-                gridcolor: 'rgba(128,128,128,0.2)',
-                showticklabels: true,
-                zeroline: true,
-                title: ''
-              };
+              layout[yAxisKey] = yAxisConfig;
             }
           });
           return {
@@ -3146,6 +3484,37 @@ var PluginRegister = (function () {
               onChange: 'onLayoutUpdate',
               advanced: true
             },
+            // Global Y axis settings for all subplots
+            subtractPedestal: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Subtract Pedestal (Global)',
+              onChange: 'onLayoutUpdate',
+              advanced: false
+            },
+            fixYAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Fix Y Axis Range (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            yAxisMin: {
+              type: SettingTypes.NUMBER,
+              "default": -2048,
+              // -2^11
+              label: 'Y Axis Min (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            yAxisMax: {
+              type: SettingTypes.NUMBER,
+              "default": 2048,
+              // 2^11
+              label: 'Y Axis Max (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
             // Integral visualization settings
             showIntegralBounds: {
               type: SettingTypes.BOOLEAN,
@@ -3274,7 +3643,7 @@ var PluginRegister = (function () {
           };
         }
       }]);
-    }(Figure), _defineProperty(_WFD5SoccerBallLysoArray, "displayName", 'WFD5 Lyso Array Waveforms'), _defineProperty(_WFD5SoccerBallLysoArray, "name", 'WFD5LysoArrayWaveforms'), _WFD5SoccerBallLysoArray;
+    }(Figure), _defineProperty(_WFD5LysoArrayWaveforms, "displayName", 'WFD5 Lyso Array Waveforms'), _defineProperty(_WFD5LysoArrayWaveforms, "name", 'WFD5LysoArrayWaveforms'), _WFD5LysoArrayWaveforms;
   }
 
   function makeWFD5WaveformTraceOnly(_ref) {
