@@ -23,7 +23,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
         advanced: true,
       },
 
-      // Plot refresh
+      // Plot refresh speed
       updateFrequency: {
         type: SettingTypes.NUMBER,
         default: 2,
