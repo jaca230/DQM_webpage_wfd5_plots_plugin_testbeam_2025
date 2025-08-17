@@ -9,7 +9,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       traceDataUrl: {
         type: SettingTypes.STRING,
         default:
-          'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+          'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
         label: 'Trace Data URL',
         onChange: 'onUpdateTick',
         advanced: true,
@@ -17,7 +17,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       integralDataUrl: {
         type: SettingTypes.STRING,
         default:
-          'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+          'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
         label: 'Integral Data URL',
         onChange: 'onUpdateTick',
         advanced: true,
@@ -132,6 +132,29 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
         type: SettingTypes.NUMBER,
         default: 2048, // 2^11
         label: 'Y Axis Max',
+        onChange: 'onLayoutUpdate',
+        advanced: true,
+      },
+
+      // X axis settings
+      fixXAxis: {
+        type: SettingTypes.BOOLEAN,
+        default: false,
+        label: 'Fix X Axis Range',
+        onChange: 'onLayoutUpdate',
+        advanced: true,
+      },
+      xAxisMin: {
+        type: SettingTypes.NUMBER,
+        default: 0,
+        label: 'X Axis Min',
+        onChange: 'onLayoutUpdate',
+        advanced: true,
+      },
+      xAxisMax: {
+        type: SettingTypes.NUMBER,
+        default: 2048,
+        label: 'X Axis Max',
         onChange: 'onLayoutUpdate',
         advanced: true,
       },
@@ -272,7 +295,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       const { data, layout: newLayout } = this.formatPlotly(traceRaw, integralRaw);
       this.setState((prev) => ({
         data,
-        layout: { ...prev.layout, shapes: newLayout.shapes, annotations: newLayout.annotations, yaxis: newLayout.yaxis },
+        layout: { ...prev.layout, shapes: newLayout.shapes, annotations: newLayout.annotations, yaxis: newLayout.yaxis, xaxis: newLayout.xaxis },
         error: null,
         revision: prev.revision + 1,
       }));
@@ -540,10 +563,22 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       yaxis.autorange = true;
     }
 
+    // Configure X-axis based on fixXAxis setting
+    const xaxis = {
+      title: 'Sample Number'
+    };
+    
+    if (s.fixXAxis) {
+      xaxis.range = [s.xAxisMin, s.xAxisMax];
+      xaxis.autorange = false;
+    } else {
+      xaxis.autorange = true;
+    }
+
     const layout = {
       autosize: true,
       margin: { t: 50, r: 20, l: 60, b: 40 },
-      xaxis: { title: 'Sample Number' },
+      xaxis,
       yaxis,
       legend: { orientation: 'h', y: -0.15 },
       shapes,

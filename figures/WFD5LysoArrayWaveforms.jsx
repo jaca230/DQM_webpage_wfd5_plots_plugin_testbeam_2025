@@ -29,13 +29,13 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         },
         traceDataUrl: {
             type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Trace Data URL',
             advanced: true,
         },
         integralDataUrl: {
             type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
             label: 'Integral Data URL',
             advanced: true,
         },
@@ -129,6 +129,29 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             type: SettingTypes.NUMBER,
             default: 2048, // 2^11
             label: 'Y Axis Max (Global, bugged requires refresh)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+
+        // Global X axis settings for all subplots
+        fixXAxis: {
+            type: SettingTypes.BOOLEAN,
+            default: false,
+            label: 'Fix X Axis Range (Global, bugged requires refresh)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        xAxisMin: {
+            type: SettingTypes.NUMBER,
+            default: 0,
+            label: 'X Axis Min (Global, bugged requires refresh)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        xAxisMax: {
+            type: SettingTypes.NUMBER,
+            default: 2048,
+            label: 'X Axis Max (Global, bugged requires refresh)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
@@ -464,7 +487,8 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         integralLineColor, integralLineWidth, integralLineDash, integralFillColor,
         pedestalLineColor, pedestalLineWidth, pedestalLineDash, pedestalStdevFillColor,
         integralInfoBoxBgColor, integralInfoBoxBorderColor, integralInfoBoxX, integralInfoBoxY,
-        showSubplotLabels, subtractPedestal, fixYAxis, yAxisMin, yAxisMax
+        showSubplotLabels, subtractPedestal, fixYAxis, yAxisMin, yAxisMax,
+        fixXAxis, xAxisMin, xAxisMax
         } = this.settings;
 
         const positions = this.getSoccerBallPositions();
@@ -626,6 +650,24 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             const xAxisKey = i === 0 ? 'xaxis' : `xaxis${i + 1}`;
             const yAxisKey = i === 0 ? 'yaxis' : `yaxis${i + 1}`;
 
+            // Configure X-axis based on global fixXAxis setting
+            const xAxisConfig = {
+                domain: xDomain, 
+                anchor: `y${i + 1}`, 
+                showgrid: true, 
+                gridcolor: 'rgba(128,128,128,0.2)', 
+                showticklabels: true, 
+                zeroline: true, 
+                title: ''
+            };
+
+            if (fixXAxis) {
+                xAxisConfig.range = [xAxisMin, xAxisMax];
+                xAxisConfig.autorange = false;
+            } else {
+                xAxisConfig.autorange = true;
+            }
+
             // Configure Y-axis based on global fixYAxis setting
             const yAxisConfig = {
                 domain: yDomain, 
@@ -644,7 +686,7 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
                 yAxisConfig.autorange = true;
             }
 
-            layout[xAxisKey] = { domain: xDomain, anchor: `y${i + 1}`, showgrid: true, gridcolor: 'rgba(128,128,128,0.2)', showticklabels: true, zeroline: true, title: '' };
+            layout[xAxisKey] = xAxisConfig;
             layout[yAxisKey] = yAxisConfig;
         }
         });

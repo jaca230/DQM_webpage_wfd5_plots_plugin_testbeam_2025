@@ -573,7 +573,7 @@ var PluginRegister = (function () {
             },
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -889,7 +889,7 @@ var PluginRegister = (function () {
           return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://localhost:8001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+              "default": 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -1108,7 +1108,8 @@ var PluginRegister = (function () {
                       layout: _objectSpread2(_objectSpread2({}, prev.layout), {}, {
                         shapes: newLayout.shapes,
                         annotations: newLayout.annotations,
-                        yaxis: newLayout.yaxis
+                        yaxis: newLayout.yaxis,
+                        xaxis: newLayout.xaxis
                       }),
                       error: null,
                       revision: prev.revision + 1
@@ -1447,6 +1448,17 @@ var PluginRegister = (function () {
           } else {
             yaxis.autorange = true;
           }
+
+          // Configure X-axis based on fixXAxis setting
+          var xaxis = {
+            title: 'Sample Number'
+          };
+          if (s.fixXAxis) {
+            xaxis.range = [s.xAxisMin, s.xAxisMax];
+            xaxis.autorange = false;
+          } else {
+            xaxis.autorange = true;
+          }
           var layout = {
             autosize: true,
             margin: {
@@ -1455,9 +1467,7 @@ var PluginRegister = (function () {
               l: 60,
               b: 40
             },
-            xaxis: {
-              title: 'Sample Number'
-            },
+            xaxis: xaxis,
             yaxis: yaxis,
             legend: {
               orientation: 'h',
@@ -1512,14 +1522,14 @@ var PluginRegister = (function () {
             // Data URLs
             traceDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Trace Data URL',
               onChange: 'onUpdateTick',
               advanced: true
             },
             integralDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
               label: 'Integral Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -1632,6 +1642,28 @@ var PluginRegister = (function () {
               "default": 2048,
               // 2^11
               label: 'Y Axis Max',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            // X axis settings
+            fixXAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Fix X Axis Range',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            xAxisMin: {
+              type: SettingTypes.NUMBER,
+              "default": 0,
+              label: 'X Axis Min',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            xAxisMax: {
+              type: SettingTypes.NUMBER,
+              "default": 2048,
+              label: 'X Axis Max',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
@@ -2632,7 +2664,7 @@ var PluginRegister = (function () {
             },
             histogramDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
               label: 'Histogram Data URL',
               advanced: true
             },
@@ -3021,7 +3053,10 @@ var PluginRegister = (function () {
             subtractPedestal = _this$settings3.subtractPedestal,
             fixYAxis = _this$settings3.fixYAxis,
             yAxisMin = _this$settings3.yAxisMin,
-            yAxisMax = _this$settings3.yAxisMax;
+            yAxisMax = _this$settings3.yAxisMax,
+            fixXAxis = _this$settings3.fixXAxis,
+            xAxisMin = _this$settings3.xAxisMin,
+            xAxisMax = _this$settings3.xAxisMax;
           var positions = this.getSoccerBallPositions();
           var plotlyTraces = [];
           var shapes = [];
@@ -3228,6 +3263,23 @@ var PluginRegister = (function () {
               var xAxisKey = i === 0 ? 'xaxis' : "xaxis".concat(i + 1);
               var yAxisKey = i === 0 ? 'yaxis' : "yaxis".concat(i + 1);
 
+              // Configure X-axis based on global fixXAxis setting
+              var xAxisConfig = {
+                domain: xDomain,
+                anchor: "y".concat(i + 1),
+                showgrid: true,
+                gridcolor: 'rgba(128,128,128,0.2)',
+                showticklabels: true,
+                zeroline: true,
+                title: ''
+              };
+              if (fixXAxis) {
+                xAxisConfig.range = [xAxisMin, xAxisMax];
+                xAxisConfig.autorange = false;
+              } else {
+                xAxisConfig.autorange = true;
+              }
+
               // Configure Y-axis based on global fixYAxis setting
               var yAxisConfig = {
                 domain: yDomain,
@@ -3244,15 +3296,7 @@ var PluginRegister = (function () {
               } else {
                 yAxisConfig.autorange = true;
               }
-              layout[xAxisKey] = {
-                domain: xDomain,
-                anchor: "y".concat(i + 1),
-                showgrid: true,
-                gridcolor: 'rgba(128,128,128,0.2)',
-                showticklabels: true,
-                zeroline: true,
-                title: ''
-              };
+              layout[xAxisKey] = xAxisConfig;
               layout[yAxisKey] = yAxisConfig;
             }
           });
@@ -3420,13 +3464,13 @@ var PluginRegister = (function () {
             },
             traceDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Trace Data URL',
               advanced: true
             },
             integralDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
               label: 'Integral Data URL',
               advanced: true
             },
@@ -3512,6 +3556,28 @@ var PluginRegister = (function () {
               "default": 2048,
               // 2^11
               label: 'Y Axis Max (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            // Global X axis settings for all subplots
+            fixXAxis: {
+              type: SettingTypes.BOOLEAN,
+              "default": false,
+              label: 'Fix X Axis Range (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            xAxisMin: {
+              type: SettingTypes.NUMBER,
+              "default": 0,
+              label: 'X Axis Min (Global, bugged requires refresh)',
+              onChange: 'onLayoutUpdate',
+              advanced: true
+            },
+            xAxisMax: {
+              type: SettingTypes.NUMBER,
+              "default": 2048,
+              label: 'X Axis Max (Global, bugged requires refresh)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
@@ -3801,7 +3867,7 @@ var PluginRegister = (function () {
             // Data URL
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:8001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
