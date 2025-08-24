@@ -168,9 +168,9 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
     
       // Extract interior bins and transpose to match ROOT orientation
       const counts2D = [];
-      for (let ix = 1; ix <= nBinsX; ix++) {
+      for (let iy = 1; iy <= nBinsY; iy++) {
         const row = [];
-        for (let iy = 1; iy <= nBinsY; iy++) {
+        for (let ix = 1; ix <= nBinsX; ix++) {
           row.push(countsFull[iy][ix] || 0);
         }
         counts2D.push(row);
