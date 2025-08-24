@@ -147,64 +147,53 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
     extractPlotData(raw) {
       const hist = raw?.data;
       if (!hist || !Array.isArray(hist.fArray)) return null;
-
+    
       const xAxis = hist.fXaxis || {};
       const yAxis = hist.fYaxis || {};
-
+    
       const nBinsX = xAxis.fNbins;
       const nBinsY = yAxis.fNbins;
-
       if (!nBinsX || !nBinsY) return null;
-
+    
+      // Bin edges
       const binEdgesX = xAxis.fXbins || this.makeLinearBins(xAxis.fXmin, xAxis.fXmax, nBinsX);
       const binEdgesY = yAxis.fXbins || this.makeLinearBins(yAxis.fXmin, yAxis.fXmax, nBinsY);
-
-      // TH2D fArray layout: 
-      // fArray[0] = underflow, next nBinsX*nBinsY elements = bin contents, fArray end = overflow
-      // Extract 2D histogram counts from fArray ignoring underflow and overflow
-      const countsFlat = hist.fArray.slice(1, 1 + nBinsX * nBinsY);
-
-      // Reshape to 2D array [y][x] for heatmap (ROOT stores histograms in row-major order)
+    
+      // Full array including underflow/overflow
+      const countsFlatFull = hist.fArray;
+      const countsFull = [];
+      for (let iy = 0; iy < nBinsY + 2; iy++) {
+        countsFull.push(countsFlatFull.slice(iy * (nBinsX + 2), (iy + 1) * (nBinsX + 2)));
+      }
+    
+      // Extract interior bins and transpose to match ROOT orientation
       const counts2D = [];
-      for (let iy = 0; iy < nBinsY; iy++) {
+      for (let ix = 1; ix <= nBinsX; ix++) {
         const row = [];
-        for (let ix = 0; ix < nBinsX; ix++) {
-          row.push(countsFlat[iy * nBinsX + ix] || 0);
+        for (let iy = 1; iy <= nBinsY; iy++) {
+          row.push(countsFull[iy][ix] || 0);
         }
         counts2D.push(row);
       }
-
-      // Compute marginal histograms (sum counts along x and y axes)
+    
+      // Compute marginal sums
       const marginalX = new Array(nBinsX).fill(0);
       const marginalY = new Array(nBinsY).fill(0);
-      for (let iy = 0; iy < nBinsY; iy++) {
-        for (let ix = 0; ix < nBinsX; ix++) {
-          const val = counts2D[iy][ix];
+      for (let ix = 0; ix < nBinsX; ix++) {
+        for (let iy = 0; iy < nBinsY; iy++) {
+          const val = counts2D[ix][iy];
           marginalX[ix] += val;
           marginalY[iy] += val;
         }
       }
-
-      // Use bin centers for axes: centers = (edges[i] + edges[i+1]) / 2
-      const centersX = [];
-      for (let i = 0; i < nBinsX; i++) {
-        centersX.push(0.5 * (binEdgesX[i] + binEdgesX[i + 1]));
-      }
-      const centersY = [];
-      for (let i = 0; i < nBinsY; i++) {
-        centersY.push(0.5 * (binEdgesY[i] + binEdgesY[i + 1]));
-      }
-
-      return { 
-        counts2D,
-        centersX,
-        centersY,
-        marginalX,
-        marginalY,
-        nBinsX,
-        nBinsY,
-      };
+    
+      // Bin centers
+      const centersX = binEdgesX.slice(0, -1).map((v, i) => 0.5 * (v + binEdgesX[i + 1]));
+      const centersY = binEdgesY.slice(0, -1).map((v, i) => 0.5 * (v + binEdgesY[i + 1]));
+    
+      return { counts2D, centersX, centersY, marginalX, marginalY, nBinsX, nBinsY };
     }
+
 
     makeLinearBins(min, max, n) {
       const bins = [];
