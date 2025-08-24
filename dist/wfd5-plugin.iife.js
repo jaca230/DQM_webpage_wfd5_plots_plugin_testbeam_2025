@@ -636,7 +636,7 @@ var PluginRegister = (function () {
           var marginalY = new Array(nBinsY).fill(0);
           for (var _ix = 0; _ix < nBinsX; _ix++) {
             for (var _iy2 = 0; _iy2 < nBinsY; _iy2++) {
-              var val = counts2D[_ix][_iy2];
+              var val = counts2D[_iy2][_ix];
               marginalX[_ix] += val;
               marginalY[_iy2] += val;
             }
