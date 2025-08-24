@@ -2650,14 +2650,14 @@ function makeWFD5LysoArrayHistograms(_ref) {
           detectorSystems: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
-            "default": ['HODO', 'HODO', 'HODO', 'HODO', 'HODO', 'HODO'],
+            "default": ['LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO'],
             label: 'Detector Systems',
             advanced: false
           },
           subdetectors: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
-            "default": ['X1', 'X2', 'X3', 'X4', 'X5', 'X6'],
+            "default": ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
             label: 'Subdetectors',
             advanced: false
           },
@@ -3450,14 +3450,14 @@ function makeWFD5LysoArrayWaveforms(_ref) {
           detectorSystems: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
-            "default": ['HODO', 'HODO', 'HODO', 'HODO', 'HODO', 'HODO'],
+            "default": ['LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO'],
             label: 'Detector Systems',
             advanced: false
           },
           subdetectors: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
-            "default": ['X1', 'X2', 'X3', 'X4', 'X5', 'X6'],
+            "default": ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
             label: 'Subdetectors',
             advanced: false
           },
