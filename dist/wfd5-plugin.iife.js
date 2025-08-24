@@ -609,44 +609,46 @@ var PluginRegister = (function () {
           var nBinsX = xAxis.fNbins;
           var nBinsY = yAxis.fNbins;
           if (!nBinsX || !nBinsY) return null;
+
+          // Bin edges
           var binEdgesX = xAxis.fXbins || this.makeLinearBins(xAxis.fXmin, xAxis.fXmax, nBinsX);
           var binEdgesY = yAxis.fXbins || this.makeLinearBins(yAxis.fXmin, yAxis.fXmax, nBinsY);
 
-          // TH2D fArray layout: 
-          // fArray[0] = underflow, next nBinsX*nBinsY elements = bin contents, fArray end = overflow
-          // Extract 2D histogram counts from fArray ignoring underflow and overflow
-          var countsFlat = hist.fArray.slice(1, 1 + nBinsX * nBinsY);
+          // Full array including underflow/overflow
+          var countsFlatFull = hist.fArray;
+          var countsFull = [];
+          for (var iy = 0; iy < nBinsY + 2; iy++) {
+            countsFull.push(countsFlatFull.slice(iy * (nBinsX + 2), (iy + 1) * (nBinsX + 2)));
+          }
 
-          // Reshape to 2D array [y][x] for heatmap (ROOT stores histograms in row-major order)
+          // Extract interior bins and transpose to match ROOT orientation
           var counts2D = [];
-          for (var iy = 0; iy < nBinsY; iy++) {
+          for (var ix = 1; ix <= nBinsX; ix++) {
             var row = [];
-            for (var ix = 0; ix < nBinsX; ix++) {
-              row.push(countsFlat[iy * nBinsX + ix] || 0);
+            for (var _iy = 1; _iy <= nBinsY; _iy++) {
+              row.push(countsFull[_iy][ix] || 0);
             }
             counts2D.push(row);
           }
 
-          // Compute marginal histograms (sum counts along x and y axes)
+          // Compute marginal sums
           var marginalX = new Array(nBinsX).fill(0);
           var marginalY = new Array(nBinsY).fill(0);
-          for (var _iy = 0; _iy < nBinsY; _iy++) {
-            for (var _ix = 0; _ix < nBinsX; _ix++) {
-              var val = counts2D[_iy][_ix];
+          for (var _ix = 0; _ix < nBinsX; _ix++) {
+            for (var _iy2 = 0; _iy2 < nBinsY; _iy2++) {
+              var val = counts2D[_ix][_iy2];
               marginalX[_ix] += val;
-              marginalY[_iy] += val;
+              marginalY[_iy2] += val;
             }
           }
 
-          // Use bin centers for axes: centers = (edges[i] + edges[i+1]) / 2
-          var centersX = [];
-          for (var i = 0; i < nBinsX; i++) {
-            centersX.push(0.5 * (binEdgesX[i] + binEdgesX[i + 1]));
-          }
-          var centersY = [];
-          for (var _i = 0; _i < nBinsY; _i++) {
-            centersY.push(0.5 * (binEdgesY[_i] + binEdgesY[_i + 1]));
-          }
+          // Bin centers
+          var centersX = binEdgesX.slice(0, -1).map(function (v, i) {
+            return 0.5 * (v + binEdgesX[i + 1]);
+          });
+          var centersY = binEdgesY.slice(0, -1).map(function (v, i) {
+            return 0.5 * (v + binEdgesY[i + 1]);
+          });
           return {
             counts2D: counts2D,
             centersX: centersX,
@@ -1534,7 +1536,7 @@ var PluginRegister = (function () {
               onChange: 'onUpdateTick',
               advanced: true
             },
-            // Plot refresh
+            // Plot refresh speed
             updateFrequency: {
               type: SettingTypes.NUMBER,
               "default": 2,
