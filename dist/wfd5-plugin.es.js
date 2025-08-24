@@ -620,9 +620,9 @@ function makeWFD5HodoscopePositionHistogram(_ref) {
 
         // Extract interior bins and transpose to match ROOT orientation
         var counts2D = [];
-        for (var ix = 1; ix <= nBinsX; ix++) {
+        for (var _iy = 1; _iy <= nBinsY; _iy++) {
           var row = [];
-          for (var _iy = 1; _iy <= nBinsY; _iy++) {
+          for (var ix = 1; ix <= nBinsX; ix++) {
             row.push(countsFull[_iy][ix] || 0);
           }
           counts2D.push(row);
