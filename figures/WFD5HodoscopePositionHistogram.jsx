@@ -181,11 +181,12 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
       const marginalY = new Array(nBinsY).fill(0);
       for (let ix = 0; ix < nBinsX; ix++) {
         for (let iy = 0; iy < nBinsY; iy++) {
-          const val = counts2D[ix][iy];
+          const val = counts2D[iy][ix];
           marginalX[ix] += val;
           marginalY[iy] += val;
         }
       }
+
     
       // Bin centers
       const centersX = binEdgesX.slice(0, -1).map((v, i) => 0.5 * (v + binEdgesX[i + 1]));
