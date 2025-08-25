@@ -106,6 +106,13 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
+        useLogScale: {
+            type: SettingTypes.BOOLEAN,
+            default: false,
+            label: 'Use Log Scale (Y-axis)',
+            onChange: 'onLayoutUpdate',
+            advanced: false,
+        },
         };
     }
 
@@ -312,7 +319,7 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
     }
 
     buildSoccerBallSubplots(histogramsData) {
-        const { barColors, subplotSize, showSubplotLabels } = this.settings;
+        const { barColors, subplotSize, showSubplotLabels, useLogScale } = this.settings;
         const positions = this.getSoccerBallPositions();
         const plotlyTraces = [];
         const annotations = [];
@@ -387,6 +394,7 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             showticklabels: true,
             zeroline: false,
             title: '',
+            type: useLogScale ? 'log' : 'linear',
             };
         }
         });

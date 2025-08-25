@@ -44,7 +44,7 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
         dataUrl: {
           type: SettingTypes.STRING,
           default:
-            'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
           label: 'Data URL',
           onChange: 'onUpdateTick',
           advanced: true,

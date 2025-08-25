@@ -72,6 +72,14 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           onChange: 'onUpdateTick',
           advanced: true,
         },
+
+        useLogScale: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Use Log Scale (Y-axis)',
+          onChange: 'onLayoutUpdate',
+          advanced: false,
+        },
       };
     }
 
@@ -258,6 +266,8 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
 
     buildLayout(trace) {
       if (!trace) return {};
+      const { useLogScale } = this.settings;
+      
       return {
         autosize: true,
         margin: { t: 30, r: 20, l: 40, b: 40 },
@@ -265,7 +275,10 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           title: 'Integral',
           range: [trace.x[0], trace.x[trace.x.length - 1]],
         },
-        yaxis: { title: 'Counts' },
+        yaxis: { 
+          title: 'Counts',
+          type: useLogScale ? 'log' : 'linear',
+        },
         bargap: 0,
         legend: { orientation: 'h', y: -0.2 },
       };

@@ -506,6 +506,7 @@ function makeWFD5IntegralHistogram(_ref) {
       key: "buildLayout",
       value: function buildLayout(trace) {
         if (!trace) return {};
+        var useLogScale = this.settings.useLogScale;
         return {
           autosize: true,
           margin: {
@@ -519,7 +520,8 @@ function makeWFD5IntegralHistogram(_ref) {
             range: [trace.x[0], trace.x[trace.x.length - 1]]
           },
           yaxis: {
-            title: 'Counts'
+            title: 'Counts',
+            type: useLogScale ? 'log' : 'linear'
           },
           bargap: 0,
           legend: {
@@ -592,6 +594,13 @@ function makeWFD5IntegralHistogram(_ref) {
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
+          },
+          useLogScale: {
+            type: SettingTypes.BOOLEAN,
+            "default": false,
+            label: 'Use Log Scale (Y-axis)',
+            onChange: 'onLayoutUpdate',
+            advanced: false
           }
         });
       }
@@ -906,7 +915,7 @@ function makeWFD5HodoscopePositionHistogram(_ref) {
         return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://localhost:3001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+            "default": 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -1539,14 +1548,14 @@ function makeWFD5Waveform(_ref) {
           // Data URLs
           traceDataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Trace Data URL',
             onChange: 'onUpdateTick',
             advanced: true
           },
           integralDataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
             label: 'Integral Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -2456,7 +2465,8 @@ function makeWFD5LysoArrayHistograms(_ref) {
         var _this$settings4 = this.settings,
           barColors = _this$settings4.barColors,
           subplotSize = _this$settings4.subplotSize,
-          showSubplotLabels = _this$settings4.showSubplotLabels;
+          showSubplotLabels = _this$settings4.showSubplotLabels,
+          useLogScale = _this$settings4.useLogScale;
         var positions = this.getSoccerBallPositions();
         var plotlyTraces = [];
         var annotations = [];
@@ -2528,7 +2538,8 @@ function makeWFD5LysoArrayHistograms(_ref) {
               gridcolor: 'rgba(128,128,128,0.2)',
               showticklabels: true,
               zeroline: false,
-              title: ''
+              title: '',
+              type: useLogScale ? 'log' : 'linear'
             };
           }
         });
@@ -2763,6 +2774,13 @@ function makeWFD5LysoArrayHistograms(_ref) {
             label: 'Show Subplot Labels (bugged must refresh page)',
             onChange: 'onLayoutUpdate',
             advanced: true
+          },
+          useLogScale: {
+            type: SettingTypes.BOOLEAN,
+            "default": false,
+            label: 'Use Log Scale (Y-axis)',
+            onChange: 'onLayoutUpdate',
+            advanced: false
           }
         };
       }
@@ -3494,13 +3512,13 @@ function makeWFD5LysoArrayWaveforms(_ref) {
           },
           traceDataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Trace Data URL',
             advanced: true
           },
           integralDataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
             label: 'Integral Data URL',
             advanced: true
           },
@@ -3897,7 +3915,7 @@ function makeWFD5WaveformTraceOnly(_ref) {
           // Data URL
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
