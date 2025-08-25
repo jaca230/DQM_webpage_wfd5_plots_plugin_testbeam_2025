@@ -176,15 +176,26 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
 
         if (!Array.isArray(histList)) return null;
 
-        const pattern = new RegExp(
-            `det[_\\s]*${detectorSystem}.*subdet[_\\s]*${subdetector}`,
+        // Escape special regex characters in detector system and subdetector names
+        const escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Create more precise regex patterns with word boundaries
+        // This pattern ensures we match the exact detector and subdetector values
+        const detectorPattern = `det[_\\s]*${escapedDetector}(?:[_\\s]|$)`;
+        const subdetectorPattern = `subdet[_\\s]*${escapedSubdetector}(?:[_\\s]|$)`;
+        
+        // Combined pattern that requires both detector and subdetector to match precisely
+        const combinedPattern = new RegExp(
+            `(?=.*${detectorPattern})(?=.*${subdetectorPattern})`,
             'i'
         );
 
         const histItem = histList.find((h) => {
             const name = h.fName ?? '';
             const title = h.fTitle ?? '';
-            return pattern.test(name) || pattern.test(title);
+            const fullText = `${name} ${title}`;
+            return combinedPattern.test(fullText);
         });
 
         return histItem ? { histItem, detectorSystem, subdetector, index: i } : null;
@@ -196,9 +207,10 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
 
     extractChannelInfo(name, title) {
         const text = `${name} ${title}`.toLowerCase();
-        const crateMatch = text.match(/crate[_\s]*(\d+)/);
-        const amcMatch = text.match(/amc[_\s]*(\d+)/);
-        const channelMatch = text.match(/ch[_\s]*(\d+)/);
+        // Use word boundaries to ensure exact number matches
+        const crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
+        const amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
+        const channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
 
         const info = {};
         if (crateMatch) info.crate = parseInt(crateMatch[1], 10);

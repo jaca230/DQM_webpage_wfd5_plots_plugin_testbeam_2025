@@ -96,10 +96,10 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
     extractChannelInfo(name, title) {
       const text = `${name} ${title}`.toLowerCase();
       
-      // Try to extract crate, amc, and channel numbers
-      const crateMatch = text.match(/crate[_\s]*(\d+)/);
-      const amcMatch = text.match(/amc[_\s]*(\d+)/);
-      const channelMatch = text.match(/ch[_\s]*(\d+)/);
+      // Use word boundaries to ensure exact number matches
+      const crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
+      const amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
+      const channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
       
       return {
         crate: crateMatch ? parseInt(crateMatch[1], 10) : null,
@@ -112,9 +112,9 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
     extractDetectorInfo(name, title) {
       const text = `${name} ${title}`.toLowerCase();
       
-      // Try to extract detector and subdetector info
-      const detMatch = text.match(/det[_\s]*([a-zA-Z0-9]+)/);
-      const subdetMatch = text.match(/subdet[_\s]*([a-zA-Z0-9]+)/);
+      // Use word boundaries to ensure exact matches for detector names
+      const detMatch = text.match(/det[_\s]*([a-zA-Z0-9]+)(?:[_\s]|$)/);
+      const subdetMatch = text.match(/subdet[_\s]*([a-zA-Z0-9]+)(?:[_\s]|$)/);
       
       return {
         detectorSystem: detMatch ? detMatch[1] : null,
@@ -143,14 +143,23 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
 
       // Try to match by detector/subdetector first
       if (detectorSystem && subdetector) {
-        const pattern = new RegExp(
-          `det[_\\s]*${detectorSystem}.*subdet[_\\s]*${subdetector}`,
+        // Escape special regex characters and use precise matching
+        const escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        const detectorPattern = `det[_\\s]*${escapedDetector}(?:[_\\s]|$)`;
+        const subdetectorPattern = `subdet[_\\s]*${escapedSubdetector}(?:[_\\s]|$)`;
+        
+        const combinedPattern = new RegExp(
+          `(?=.*${detectorPattern})(?=.*${subdetectorPattern})`,
           'i'
         );
+
         match = list.find((h) => {
           const name = h.fName ?? '';
           const title = h.fTitle ?? '';
-          return pattern.test(name) || pattern.test(title);
+          const fullText = `${name} ${title}`;
+          return combinedPattern.test(fullText);
         });
         
         if (match) {
@@ -170,14 +179,23 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
 
       // Fall back to crate/amc/channel if no detector match
       if (!match && (crate || amcSlot || channel)) {
-        const pattern = new RegExp(
-          `crate[_\\s]*${crate}.*amc[_\\s]*${amcSlot}.*ch[_\\s]*${channel}`,
+        // Use precise matching with word boundaries for numbers
+        const cratePattern = crate ? `crate[_\\s]*${crate}(?:[_\\s]|$)` : '';
+        const amcPattern = amcSlot ? `amc[_\\s]*${amcSlot}(?:[_\\s]|$)` : '';
+        const channelPattern = channel ? `ch[_\\s]*${channel}(?:[_\\s]|$)` : '';
+        
+        // Build combined pattern with positive lookaheads for all specified values
+        const patterns = [cratePattern, amcPattern, channelPattern].filter(p => p);
+        const combinedPattern = new RegExp(
+          patterns.map(p => `(?=.*${p})`).join(''),
           'i'
         );
+
         match = list.find((h) => {
           const name = h.fName ?? '';
           const title = h.fTitle ?? '';
-          return pattern.test(name) || pattern.test(title);
+          const fullText = `${name} ${title}`;
+          return combinedPattern.test(fullText);
         });
         
         if (match) {

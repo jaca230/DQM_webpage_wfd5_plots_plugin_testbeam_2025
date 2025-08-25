@@ -345,10 +345,10 @@ var PluginRegister = (function () {
         value: function extractChannelInfo(name, title) {
           var text = "".concat(name, " ").concat(title).toLowerCase();
 
-          // Try to extract crate, amc, and channel numbers
-          var crateMatch = text.match(/crate[_\s]*(\d+)/);
-          var amcMatch = text.match(/amc[_\s]*(\d+)/);
-          var channelMatch = text.match(/ch[_\s]*(\d+)/);
+          // Use word boundaries to ensure exact number matches
+          var crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
+          var amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
+          var channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
           return {
             crate: crateMatch ? parseInt(crateMatch[1], 10) : null,
             amcSlot: amcMatch ? parseInt(amcMatch[1], 10) : null,
@@ -362,9 +362,9 @@ var PluginRegister = (function () {
         value: function extractDetectorInfo(name, title) {
           var text = "".concat(name, " ").concat(title).toLowerCase();
 
-          // Try to extract detector and subdetector info
-          var detMatch = text.match(/det[_\s]*([a-zA-Z0-9]+)/);
-          var subdetMatch = text.match(/subdet[_\s]*([a-zA-Z0-9]+)/);
+          // Use word boundaries to ensure exact matches for detector names
+          var detMatch = text.match(/det[_\s]*([a-zA-Z0-9]+)(?:[_\s]|$)/);
+          var subdetMatch = text.match(/subdet[_\s]*([a-zA-Z0-9]+)(?:[_\s]|$)/);
           return {
             detectorSystem: detMatch ? detMatch[1] : null,
             subdetector: subdetMatch ? subdetMatch[1] : null
@@ -394,12 +394,18 @@ var PluginRegister = (function () {
 
           // Try to match by detector/subdetector first
           if (detectorSystem && subdetector) {
-            var pattern = new RegExp("det[_\\s]*".concat(detectorSystem, ".*subdet[_\\s]*").concat(subdetector), 'i');
+            // Escape special regex characters and use precise matching
+            var escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var detectorPattern = "det[_\\s]*".concat(escapedDetector, "(?:[_\\s]|$)");
+            var subdetectorPattern = "subdet[_\\s]*".concat(escapedSubdetector, "(?:[_\\s]|$)");
+            var combinedPattern = new RegExp("(?=.*".concat(detectorPattern, ")(?=.*").concat(subdetectorPattern, ")"), 'i');
             match = list.find(function (h) {
               var _h$fName, _h$fTitle;
               var name = (_h$fName = h.fName) !== null && _h$fName !== void 0 ? _h$fName : '';
               var title = (_h$fTitle = h.fTitle) !== null && _h$fTitle !== void 0 ? _h$fTitle : '';
-              return pattern.test(name) || pattern.test(title);
+              var fullText = "".concat(name, " ").concat(title);
+              return combinedPattern.test(fullText);
             });
             if (match) {
               var _match$fName, _match$fTitle;
@@ -420,12 +426,24 @@ var PluginRegister = (function () {
 
           // Fall back to crate/amc/channel if no detector match
           if (!match && (crate || amcSlot || channel)) {
-            var _pattern = new RegExp("crate[_\\s]*".concat(crate, ".*amc[_\\s]*").concat(amcSlot, ".*ch[_\\s]*").concat(channel), 'i');
+            // Use precise matching with word boundaries for numbers
+            var cratePattern = crate ? "crate[_\\s]*".concat(crate, "(?:[_\\s]|$)") : '';
+            var amcPattern = amcSlot ? "amc[_\\s]*".concat(amcSlot, "(?:[_\\s]|$)") : '';
+            var channelPattern = channel ? "ch[_\\s]*".concat(channel, "(?:[_\\s]|$)") : '';
+
+            // Build combined pattern with positive lookaheads for all specified values
+            var patterns = [cratePattern, amcPattern, channelPattern].filter(function (p) {
+              return p;
+            });
+            var _combinedPattern = new RegExp(patterns.map(function (p) {
+              return "(?=.*".concat(p, ")");
+            }).join(''), 'i');
             match = list.find(function (h) {
               var _h$fName2, _h$fTitle2;
               var name = (_h$fName2 = h.fName) !== null && _h$fName2 !== void 0 ? _h$fName2 : '';
               var title = (_h$fTitle2 = h.fTitle) !== null && _h$fTitle2 !== void 0 ? _h$fTitle2 : '';
-              return _pattern.test(name) || _pattern.test(title);
+              var fullText = "".concat(name, " ").concat(title);
+              return _combinedPattern.test(fullText);
             });
             if (match) {
               var _match$fName2, _match$fTitle2;
@@ -2272,12 +2290,24 @@ var PluginRegister = (function () {
             var subdetector = subdetectors[i];
             var histList = histogramRaw === null || histogramRaw === void 0 || (_histogramRaw$data = histogramRaw.data) === null || _histogramRaw$data === void 0 ? void 0 : _histogramRaw$data.arr;
             if (!Array.isArray(histList)) return null;
-            var pattern = new RegExp("det[_\\s]*".concat(detectorSystem, ".*subdet[_\\s]*").concat(subdetector), 'i');
+
+            // Escape special regex characters in detector system and subdetector names
+            var escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            // Create more precise regex patterns with word boundaries
+            // This pattern ensures we match the exact detector and subdetector values
+            var detectorPattern = "det[_\\s]*".concat(escapedDetector, "(?:[_\\s]|$)");
+            var subdetectorPattern = "subdet[_\\s]*".concat(escapedSubdetector, "(?:[_\\s]|$)");
+
+            // Combined pattern that requires both detector and subdetector to match precisely
+            var combinedPattern = new RegExp("(?=.*".concat(detectorPattern, ")(?=.*").concat(subdetectorPattern, ")"), 'i');
             var histItem = histList.find(function (h) {
               var _h$fName, _h$fTitle;
               var name = (_h$fName = h.fName) !== null && _h$fName !== void 0 ? _h$fName : '';
               var title = (_h$fTitle = h.fTitle) !== null && _h$fTitle !== void 0 ? _h$fTitle : '';
-              return pattern.test(name) || pattern.test(title);
+              var fullText = "".concat(name, " ").concat(title);
+              return combinedPattern.test(fullText);
             });
             return histItem ? {
               histItem: histItem,
@@ -2298,9 +2328,10 @@ var PluginRegister = (function () {
         key: "extractChannelInfo",
         value: function extractChannelInfo(name, title) {
           var text = "".concat(name, " ").concat(title).toLowerCase();
-          var crateMatch = text.match(/crate[_\s]*(\d+)/);
-          var amcMatch = text.match(/amc[_\s]*(\d+)/);
-          var channelMatch = text.match(/ch[_\s]*(\d+)/);
+          // Use word boundaries to ensure exact number matches
+          var crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
+          var amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
+          var channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
           var info = {};
           if (crateMatch) info.crate = parseInt(crateMatch[1], 10);
           if (amcMatch) info.amcSlot = parseInt(amcMatch[1], 10);
