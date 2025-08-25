@@ -573,7 +573,7 @@ var PluginRegister = (function () {
             },
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -891,7 +891,7 @@ var PluginRegister = (function () {
           return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+              "default": 'http://localhost:3001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -1524,14 +1524,14 @@ var PluginRegister = (function () {
             // Data URLs
             traceDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Trace Data URL',
               onChange: 'onUpdateTick',
               advanced: true
             },
             integralDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
               label: 'Integral Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -2666,7 +2666,7 @@ var PluginRegister = (function () {
             },
             histogramDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
               label: 'Histogram Data URL',
               advanced: true
             },
@@ -3466,13 +3466,13 @@ var PluginRegister = (function () {
             },
             traceDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Trace Data URL',
               advanced: true
             },
             integralDataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
               label: 'Integral Data URL',
               advanced: true
             },
@@ -3869,7 +3869,7 @@ var PluginRegister = (function () {
             // Data URL
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true

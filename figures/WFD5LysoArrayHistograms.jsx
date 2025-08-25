@@ -29,7 +29,7 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         },
         histogramDataUrl: {
             type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+            default: 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
             label: 'Histogram Data URL',
             advanced: true,
         },
