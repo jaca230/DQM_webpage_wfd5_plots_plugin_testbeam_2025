@@ -9,7 +9,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       traceDataUrl: {
         type: SettingTypes.STRING,
         default:
-          'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+          'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
         label: 'Trace Data URL',
         onChange: 'onUpdateTick',
         advanced: true,
@@ -17,7 +17,7 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       integralDataUrl: {
         type: SettingTypes.STRING,
         default:
-          'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
+          'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
         label: 'Integral Data URL',
         onChange: 'onUpdateTick',
         advanced: true,
