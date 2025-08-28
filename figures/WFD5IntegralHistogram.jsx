@@ -6,41 +6,8 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
     static get settingSchema() {
       return {
         ...super.settingSchema,
-        dataUrl: {
-          type: SettingTypes.STRING,
-          default:
-            'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
-          label: 'Data URL',
-          onChange: 'onUpdateTick',
-          advanced: true,
-        },
-
-        // Basic bar style
-        barColor: {
-          type: SettingTypes.COLOR,
-          default: 'rgba(70,130,180,1)',
-          label: 'Bar Color',
-          onChange: 'onLayoutUpdate',
-          advanced: false,
-        },
-
-        // Advanced bar styling
-        barBorderColor: {
-          type: SettingTypes.COLOR,
-          default: 'rgba(0,0,0,1)',
-          label: 'Bar Border Color',
-          onChange: 'onLayoutUpdate',
-          advanced: true,
-        },
-        barBorderWidth: {
-          type: SettingTypes.FLOAT,
-          default: 0,
-          label: 'Bar Border Width',
-          onChange: 'onLayoutUpdate',
-          advanced: true,
-        },
-
-        // Detector / crate selection
+        
+        // Detector selection
         detectorSystem: {
           type: SettingTypes.STRING,
           default: '',
@@ -53,6 +20,8 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           label: 'Subdetector',
           onChange: 'onUpdateTick',
         },
+
+        // Channel fallback
         crate: {
           type: SettingTypes.INT,
           default: 0,
@@ -72,16 +41,97 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           onChange: 'onUpdateTick',
         },
 
+        // Data URL (override the default from Figure)
+        dataUrl: {
+          type: SettingTypes.STRING,
+          default:
+            'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+          label: 'Data URL',
+          onChange: 'onUpdateTick',
+          advanced: true,
+        },
+
+        // Basic bar style
+        barColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(70,130,180,1)', // steelblue
+          label: 'Bar Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+
+        // Advanced bar styling
+        barBorderColor: {
+          type: SettingTypes.COLOR,
+          default: 'rgba(0,0,0,1)',
+          label: 'Bar Border Color',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        barBorderWidth: {
+          type: SettingTypes.FLOAT,
+          default: 0,
+          label: 'Bar Border Width',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+
+        // Y-axis scale
         useLogScale: {
           type: SettingTypes.BOOLEAN,
           default: false,
-          label: 'Use Log Scale (Y-axis)',
+          label: 'Use Log Scale (Y-axis) (Requires Refresh)',
           onChange: 'onLayoutUpdate',
           advanced: false,
         },
+
+        // X-axis locking
+        lockXAxis: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Lock X-Axis Range (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        xAxisMin: {
+          type: SettingTypes.FLOAT,
+          default: 0,
+          label: 'X-Axis Min (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        xAxisMax: {
+          type: SettingTypes.FLOAT,
+          default: 1000,
+          label: 'X-Axis Max (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+
+        // Y-axis locking
+        lockYAxis: {
+          type: SettingTypes.BOOLEAN,
+          default: false,
+          label: 'Lock Y-Axis Range (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        yAxisMin: {
+          type: SettingTypes.FLOAT,
+          default: 1,
+          label: 'Y-Axis Min (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
+        yAxisMax: {
+          type: SettingTypes.FLOAT,
+          default: 1000,
+          label: 'Y-Axis Max (Requires Refresh)',
+          onChange: 'onLayoutUpdate',
+          advanced: true,
+        },
       };
     }
-
 
     initPlot(raw) {
       const data = this.extractPlotData(raw);
@@ -95,7 +145,7 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
       const data = this.extractPlotData(raw);
       return {
         data: data ? [data] : [],
-        layout: undefined,
+        layout: undefined, // Don't update layout on data updates
       };
     }
 
@@ -133,26 +183,17 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
       const list = raw?.data?.arr;
       if (!Array.isArray(list)) return null;
 
-      const {
-        crate,
-        amcSlot,
-        channel,
-        detectorSystem,
-        subdetector,
-        barColor,
-        barBorderColor,
-        barBorderWidth,
-      } = this.settings;
+      const s = this.settings;
 
       let match = null;
       let matchMethod = null;
       let settingsToUpdate = {};
 
       // Try to match by detector/subdetector first
-      if (detectorSystem && subdetector) {
+      if (s.detectorSystem && s.subdetector) {
         // Escape special regex characters and use precise matching
-        const escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedDetector = s.detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSubdetector = s.subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
         const detectorPattern = `det[_\\s]*${escapedDetector}(?:[_\\s]|$)`;
         const subdetectorPattern = `subdet[_\\s]*${escapedSubdetector}(?:[_\\s]|$)`;
@@ -173,23 +214,24 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           matchMethod = 'detector';
           // Extract channel info and update settings
           const channelInfo = this.extractChannelInfo(match.fName ?? '', match.fTitle ?? '');
-          if (channelInfo.crate !== null || channelInfo.amcSlot !== null || channelInfo.channel !== null) {
-            settingsToUpdate = {
-              ...settingsToUpdate,
-              ...(channelInfo.crate !== null && { crate: channelInfo.crate }),
-              ...(channelInfo.amcSlot !== null && { amcSlot: channelInfo.amcSlot }),
-              ...(channelInfo.channel !== null && { channel: channelInfo.channel }),
-            };
+          if (channelInfo.crate !== null && s.crate !== channelInfo.crate) {
+            settingsToUpdate.crate = channelInfo.crate;
+          }
+          if (channelInfo.amcSlot !== null && s.amcSlot !== channelInfo.amcSlot) {
+            settingsToUpdate.amcSlot = channelInfo.amcSlot;
+          }
+          if (channelInfo.channel !== null && s.channel !== channelInfo.channel) {
+            settingsToUpdate.channel = channelInfo.channel;
           }
         }
       }
 
       // Fall back to crate/amc/channel if no detector match
-      if (!match && (crate || amcSlot || channel)) {
+      if (!match && (s.crate || s.amcSlot || s.channel)) {
         // Use precise matching with word boundaries for numbers
-        const cratePattern = crate ? `crate[_\\s]*${crate}(?:[_\\s]|$)` : '';
-        const amcPattern = amcSlot ? `amc[_\\s]*${amcSlot}(?:[_\\s]|$)` : '';
-        const channelPattern = channel ? `ch[_\\s]*${channel}(?:[_\\s]|$)` : '';
+        const cratePattern = s.crate ? `crate[_\\s]*${s.crate}(?:[_\\s]|$)` : '';
+        const amcPattern = s.amcSlot ? `amc[_\\s]*${s.amcSlot}(?:[_\\s]|$)` : '';
+        const channelPattern = s.channel ? `ch[_\\s]*${s.channel}(?:[_\\s]|$)` : '';
         
         // Build combined pattern with positive lookaheads for all specified values
         const patterns = [cratePattern, amcPattern, channelPattern].filter(p => p);
@@ -209,32 +251,21 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           matchMethod = 'channel';
           // Extract detector info and update settings
           const detectorInfo = this.extractDetectorInfo(match.fName ?? '', match.fTitle ?? '');
-          if (detectorInfo.detectorSystem || detectorInfo.subdetector) {
-            settingsToUpdate = {
-              ...settingsToUpdate,
-              ...(detectorInfo.detectorSystem && { detectorSystem: detectorInfo.detectorSystem }),
-              ...(detectorInfo.subdetector && { subdetector: detectorInfo.subdetector }),
-            };
+          if (detectorInfo.detectorSystem && s.detectorSystem !== detectorInfo.detectorSystem) {
+            settingsToUpdate.detectorSystem = detectorInfo.detectorSystem;
+          }
+          if (detectorInfo.subdetector && s.subdetector !== detectorInfo.subdetector) {
+            settingsToUpdate.subdetector = detectorInfo.subdetector;
           }
         }
       }
 
       // Update settings if we found complementary info
-      if (Object.keys(settingsToUpdate).length > 0) {
-        const newSettings = { ...this.settings, ...settingsToUpdate };
-        
-        // Check if any settings actually changed to avoid infinite loops
-        const hasChanges = Object.keys(settingsToUpdate).some(
-          key => this.settings[key] !== settingsToUpdate[key]
-        );
-        
-        if (hasChanges && typeof this.props.onSettingsCorrected === 'function') {
-          console.log(`[${this.id}] Auto-syncing settings via ${matchMethod} match:`, settingsToUpdate);
-          // Use setTimeout to avoid updating during render
-          setTimeout(() => {
-            this.props.onSettingsCorrected(newSettings);
-          }, 0);
-        }
+      if (Object.keys(settingsToUpdate).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
+        const newSettings = { ...s, ...settingsToUpdate };
+        console.log(`[${this.id || 'WFD5IntegralHistogram'}] Auto-syncing settings via ${matchMethod} match:`, settingsToUpdate);
+        // Use setTimeout to avoid updating during render
+        setTimeout(() => this.props.onSettingsCorrected(newSettings), 0);
       }
 
       if (!match || !Array.isArray(match.fArray)) return null;
@@ -253,10 +284,10 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
         type: 'bar',
         x: binEdges,
         y: yVals,
-        name: match.fName || `crate_${crate}_amc_${amcSlot}_ch_${channel}`,
+        name: match.fName || s.detectorSystem || `Crate ${s.crate}, AMC ${s.amcSlot}, Ch ${s.channel}`,
         marker: {
-          color: barColor,
-          line: { color: barBorderColor, width: barBorderWidth },
+          color: s.barColor,
+          line: { color: s.barBorderColor, width: s.barBorderWidth },
         },
         hoverinfo: 'x+y+name',
         width: binWidth,
@@ -264,20 +295,44 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
     }
 
     buildLayout(trace) {
-      if (!trace) return {};
-      const { useLogScale } = this.settings;
+      const s = this.settings;
+      
+      let xAxisConfig = {
+        title: 'Integral',
+      };
+      
+      let yAxisConfig = {
+        title: 'Counts',
+        type: s.useLogScale ? 'log' : 'linear',
+      };
+
+      // Apply X-axis locking
+      if (s.lockXAxis) {
+        xAxisConfig.range = [s.xAxisMin, s.xAxisMax];
+        xAxisConfig.autorange = false;
+      } else if (trace) {
+        xAxisConfig.range = [trace.x[0], trace.x[trace.x.length - 1]];
+      }
+
+      // Apply Y-axis locking
+      if (s.lockYAxis) {
+        if (s.useLogScale) {
+          // For log scale, convert linear values to log space
+          // Ensure minimum value is > 0 for log scale
+          const logMin = s.yAxisMin > 0 ? Math.log10(s.yAxisMin) : 0;
+          const logMax = s.yAxisMax > 0 ? Math.log10(s.yAxisMax) : 2;
+          yAxisConfig.range = [logMin, logMax];
+        } else {
+          yAxisConfig.range = [s.yAxisMin, s.yAxisMax];
+        }
+        yAxisConfig.autorange = false;
+      }
       
       return {
         autosize: true,
         margin: { t: 30, r: 20, l: 40, b: 40 },
-        xaxis: {
-          title: 'Integral',
-          range: [trace.x[0], trace.x[trace.x.length - 1]],
-        },
-        yaxis: { 
-          title: 'Counts',
-          type: useLogScale ? 'log' : 'linear',
-        },
+        xaxis: xAxisConfig,
+        yaxis: yAxisConfig,
         bargap: 0,
         legend: { orientation: 'h', y: -0.2 },
       };

@@ -96,6 +96,51 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             type: SettingTypes.BOOLEAN,
             default: false,
             label: 'Use Log Scale (Y-axis)',
+            onChange: 'onLayoutUpdate',
+        },
+        // X-axis locking (global for all subplots)
+        lockXAxis: {
+            type: SettingTypes.BOOLEAN,
+            default: false,
+            label: 'Lock X-Axis Range (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        xAxisMin: {
+            type: SettingTypes.NUMBER,
+            default: 0,
+            label: 'X-Axis Min (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        xAxisMax: {
+            type: SettingTypes.NUMBER,
+            default: 1000,
+            label: 'X-Axis Max (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        // Y-axis locking (global for all subplots)
+        lockYAxis: {
+            type: SettingTypes.BOOLEAN,
+            default: false,
+            label: 'Lock Y-Axis Range (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        yAxisMin: {
+            type: SettingTypes.NUMBER,
+            default: 1,
+            label: 'Y-Axis Min (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
+        },
+        yAxisMax: {
+            type: SettingTypes.NUMBER,
+            default: 1000,
+            label: 'Y-Axis Max (All Subplots)',
+            onChange: 'onLayoutUpdate',
+            advanced: true,
         },
         };
     }
@@ -178,7 +223,21 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
     }
 
     buildSoccerBallSubplots(histogramsData) {
-        const { barColors, subplotSize, showSubplotLabels, useLogScale, positionOffsetsX, positionOffsetsY } = this.settings;
+        const { 
+        barColors, 
+        subplotSize, 
+        showSubplotLabels, 
+        useLogScale, 
+        positionOffsetsX, 
+        positionOffsetsY,
+        lockXAxis,
+        xAxisMin,
+        xAxisMax,
+        lockYAxis,
+        yAxisMin,
+        yAxisMax
+        } = this.settings;
+        
         const positions = this.getSoccerBallPositions();
         const plotlyTraces = [];
         const annotations = [];
@@ -231,7 +290,8 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             const xAxisKey = i === 0 ? 'xaxis' : `xaxis${i + 1}`;
             const yAxisKey = i === 0 ? 'yaxis' : `yaxis${i + 1}`;
 
-            layout[xAxisKey] = {
+            // Build X-axis configuration
+            let xAxisConfig = {
             domain: xDomain,
             anchor: `y${i + 1}`,
             showgrid: true,
@@ -240,7 +300,15 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             zeroline: false,
             title: '',
             };
-            layout[yAxisKey] = {
+
+            // Apply X-axis locking if enabled
+            if (lockXAxis) {
+            xAxisConfig.range = [xAxisMin, xAxisMax];
+            xAxisConfig.autorange = false;
+            }
+
+            // Build Y-axis configuration
+            let yAxisConfig = {
             domain: yDomain,
             anchor: `x${i + 1}`,
             showgrid: true,
@@ -250,6 +318,23 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             title: '',
             type: useLogScale ? 'log' : 'linear',
             };
+
+            // Apply Y-axis locking if enabled
+            if (lockYAxis) {
+            if (useLogScale) {
+                // For log scale, convert linear values to log space
+                // Ensure minimum value is > 0 for log scale
+                const logMin = yAxisMin > 0 ? Math.log10(yAxisMin) : 0;
+                const logMax = yAxisMax > 0 ? Math.log10(yAxisMax) : 2;
+                yAxisConfig.range = [logMin, logMax];
+            } else {
+                yAxisConfig.range = [yAxisMin, yAxisMax];
+            }
+            yAxisConfig.autorange = false;
+            }
+
+            layout[xAxisKey] = xAxisConfig;
+            layout[yAxisKey] = yAxisConfig;
         }
         });
 
