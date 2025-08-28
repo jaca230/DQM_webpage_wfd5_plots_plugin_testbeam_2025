@@ -8,7 +8,7 @@ export default function makeWFD5HodoscopePositionHistogram({ Plot, SettingTypes 
         ...super.settingSchema,
         dataUrl: {
           type: SettingTypes.STRING,
-          default: 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+          default: 'http://localhost:3001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
           label: 'Data URL',
           onChange: 'onUpdateTick',
           advanced: true,
