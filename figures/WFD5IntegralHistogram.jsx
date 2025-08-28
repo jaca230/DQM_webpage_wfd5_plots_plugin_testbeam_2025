@@ -6,6 +6,14 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
     static get settingSchema() {
       return {
         ...super.settingSchema,
+        dataUrl: {
+          type: SettingTypes.STRING,
+          default:
+            'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+          label: 'Data URL',
+          onChange: 'onUpdateTick',
+          advanced: true,
+        },
 
         // Basic bar style
         barColor: {
@@ -62,15 +70,6 @@ export default function makeWFD5IntegralHistogram({ Plot, SettingTypes }) {
           default: 0,
           label: 'Channel #',
           onChange: 'onUpdateTick',
-        },
-
-        dataUrl: {
-          type: SettingTypes.STRING,
-          default:
-            'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
-          label: 'Data URL',
-          onChange: 'onUpdateTick',
-          advanced: true,
         },
 
         useLogScale: {

@@ -1,5 +1,6 @@
 import soccerBallData from './soccer_ball.json';
 export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
+
     return class WFD5LysoArrayHistograms extends Figure {
     static displayName = 'WFD5 Lyso Array Histograms';
     static name = 'WFD5LysoArrayHistograms';
@@ -10,28 +11,25 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             type: SettingTypes.NUMBER,
             default: 2,
             label: 'Update Interval (s)',
-            onChange: 'onUpdateFrequencyChange',
-            advanced: false,
+            onChange: 'onLayoutUpdate',
+        },
+        dataUrl: {
+            type: SettingTypes.STRING,
+            default: 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+            label: 'Data URL',
+            advanced: true,
         },
         detectorSystems: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
             default: ['LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO'],
             label: 'Detector Systems',
-            advanced: false,
         },
         subdetectors: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.STRING,
             default: ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
             label: 'Subdetectors',
-            advanced: false,
-        },
-        histogramDataUrl: {
-            type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
-            label: 'Histogram Data URL',
-            advanced: true,
         },
         barColors: {
             type: SettingTypes.ARRAY,
@@ -45,133 +43,81 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
             'rgba(255,215,0,1)',
             ],
             label: 'Bar Colors',
-            onChange: 'onLayoutUpdate',
-            advanced: false,
         },
         showSoccerBallOutline: {
             type: SettingTypes.BOOLEAN,
             default: true,
             label: 'Show Soccer Ball Outline',
-            onChange: 'onLayoutUpdate',
-            advanced: false,
         },
         soccerBallLineColor: {
             type: SettingTypes.COLOR,
             default: 'rgba(51,51,51,0.3)',
             label: 'Soccer Ball Line Color',
-            onChange: 'onLayoutUpdate',
             advanced: true,
         },
         subplotSize: {
             type: SettingTypes.NUMBER,
             default: 0.20,
             label: 'Subplot Size (fraction)',
-            onChange: 'onLayoutUpdate',
-            advanced: false,
         },
         positionOffsetsX: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.NUMBER,
             default: [0, 0, 0, 0, 0, 0],
-            label: 'X Position Offsets (fraction, bugged must refresh page)',
-            onChange: 'onLayoutUpdate',
+            label: 'X Position Offsets',
             advanced: true,
         },
         positionOffsetsY: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.NUMBER,
             default: [0, 0, 0, 0, 0, 0],
-            label: 'Y Position Offsets (fraction, bugged must refresh page)',
-            onChange: 'onLayoutUpdate',
+            label: 'Y Position Offsets',
             advanced: true,
         },
         barBorderColor: {
             type: SettingTypes.COLOR,
             default: 'rgba(0,0,0,1)',
             label: 'Bar Border Color',
-            onChange: 'onLayoutUpdate',
             advanced: true,
         },
         barBorderWidth: {
             type: SettingTypes.NUMBER,
             default: 0,
             label: 'Bar Border Width',
-            onChange: 'onLayoutUpdate',
             advanced: true,
         },
         showSubplotLabels: {
             type: SettingTypes.BOOLEAN,
             default: false,
-            label: 'Show Subplot Labels (bugged must refresh page)',
-            onChange: 'onLayoutUpdate',
+            label: 'Show Subplot Labels',
             advanced: true,
         },
         useLogScale: {
             type: SettingTypes.BOOLEAN,
             default: false,
             label: 'Use Log Scale (Y-axis)',
-            onChange: 'onLayoutUpdate',
-            advanced: false,
         },
         };
     }
 
     constructor(props) {
         super(props);
-        this.state = {
-        histogramsData: [],
-        plotlyData: [],
-        plotlyLayout: {},
-        revision: 0,
-        loading: true,
-        error: null,
-        };
         this.latestHistogramRaw = null;
+        this.state.plotlyData = [];
+        this.state.plotlyLayout = {};
+        this.state.revision = 0;
     }
 
-    async onInit() {
-        try {
-        const histogramRaw = await this.fetchJson(this.settings.histogramDataUrl);
+    onDataReceived(histogramRaw) {
         this.latestHistogramRaw = histogramRaw;
-
         const { data, layout } = this.processHistogramData(histogramRaw);
-        this.setState({
-            plotlyData: data,
-            plotlyLayout: layout,
-            loading: false,
-            error: null,
-            revision: 0,
-        });
-        } catch (err) {
-        this.setState({ error: err.message, loading: false });
-        }
-    }
-
-    async onUpdateTick() {
-        try {
-        const histogramRaw = await this.fetchJson(this.settings.histogramDataUrl);
-        this.latestHistogramRaw = histogramRaw;
-
-        const { data } = this.processHistogramData(histogramRaw);
-        this.setState((prev) => ({
-            plotlyData: data,
-            error: null,
-            revision: prev.revision + 1,
-        }));
-        } catch (err) {
-        this.setState({ error: err.message });
-        }
+        this.setState({ plotlyData: data, plotlyLayout: layout, revision: this.state.revision + 1 });
     }
 
     onLayoutUpdate() {
-        if (this.latestHistogramRaw) {
+        if (!this.latestHistogramRaw) return;
         const { data, layout } = this.processHistogramData(this.latestHistogramRaw);
-        this.setState((prev) => ({
-            plotlyData: data,
-            plotlyLayout: layout,
-            revision: prev.revision + 1,
-        }));
-        }
+        this.setState({ plotlyData: data, plotlyLayout: layout, revision: this.state.revision + 1 });
     }
 
     processHistogramData(histogramRaw) {
@@ -180,29 +126,20 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         const histogramsData = detectorSystems.map((detectorSystem, i) => {
         const subdetector = subdetectors[i];
         const histList = histogramRaw?.data?.arr;
-
         if (!Array.isArray(histList)) return null;
 
-        // Escape special regex characters in detector system and subdetector names
         const escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        // Create more precise regex patterns with word boundaries
-        // This pattern ensures we match the exact detector and subdetector values
         const detectorPattern = `det[_\\s]*${escapedDetector}(?:[_\\s]|$)`;
         const subdetectorPattern = `subdet[_\\s]*${escapedSubdetector}(?:[_\\s]|$)`;
-        
-        // Combined pattern that requires both detector and subdetector to match precisely
-        const combinedPattern = new RegExp(
-            `(?=.*${detectorPattern})(?=.*${subdetectorPattern})`,
-            'i'
-        );
+
+        const combinedPattern = new RegExp(`(?=.*${detectorPattern})(?=.*${subdetectorPattern})`, 'i');
 
         const histItem = histList.find((h) => {
             const name = h.fName ?? '';
             const title = h.fTitle ?? '';
-            const fullText = `${name} ${title}`;
-            return combinedPattern.test(fullText);
+            return combinedPattern.test(`${name} ${title}`);
         });
 
         return histItem ? { histItem, detectorSystem, subdetector, index: i } : null;
@@ -212,86 +149,8 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         return { data, layout };
     }
 
-    extractChannelInfo(name, title) {
-        const text = `${name} ${title}`.toLowerCase();
-        // Use word boundaries to ensure exact number matches
-        const crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
-        const amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
-        const channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
-
-        const info = {};
-        if (crateMatch) info.crate = parseInt(crateMatch[1], 10);
-        if (amcMatch) info.amcSlot = parseInt(amcMatch[1], 10);
-        if (channelMatch) info.channel = parseInt(channelMatch[1], 10);
-
-        return info;
-    }
-
-    getSoccerBallPositions() {
-        const { positionOffsetsX, positionOffsetsY } = this.settings;
-        const width = 100;
-        const height = 100;
-        const scale = 115;
-        const rotationDeg = 22.5;
-
-        const centroid = soccerBallData.vertices.reduce(
-        (acc, v) => [acc[0] + v[0], acc[1] + v[1]],
-        [0, 0]
-        ).map(c => c / soccerBallData.vertices.length);
-
-        const rad = (rotationDeg * Math.PI) / 180;
-        const cosA = Math.cos(rad);
-        const sinA = Math.sin(rad);
-
-        const transformVertex = v => {
-        const dx = v[0] - centroid[0];
-        const dy = v[1] - centroid[1];
-        const rx = dx * cosA - dy * sinA;
-        const ry = dx * sinA + dy * cosA;
-        return { x: rx * scale + width / 2, y: ry * scale + height / 2 };
-        };
-
-        const vertices = soccerBallData.vertices.map(transformVertex);
-        const positions = [];
-
-        for (let i = 0; i < Math.min(6, soccerBallData.hexagons.length); i++) {
-        const hex = soccerBallData.hexagons[i];
-        const hexVertices = hex.map(idx => vertices[idx]);
-        const center = hexVertices.reduce((acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }), { x: 0, y: 0 });
-        center.x /= hexVertices.length;
-        center.y /= hexVertices.length;
-
-        const offsetX = positionOffsetsX[i] || 0;
-        const offsetY = positionOffsetsY[i] || 0;
-
-        positions.push({ 
-            x: (center.x / width) + offsetX, 
-            y: (1 - center.y / height) + offsetY 
-        });
-        }
-
-        if (positions.length < 6 && soccerBallData.pentagons.length > 0) {
-        const pent = soccerBallData.pentagons[0];
-        const pentVertices = pent.map(idx => vertices[idx]);
-        const center = pentVertices.reduce((acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }), { x: 0, y: 0 });
-        center.x /= pentVertices.length;
-        center.y /= pentVertices.length;
-
-        const offsetX = positionOffsetsX[positions.length] || 0;
-        const offsetY = positionOffsetsY[positions.length] || 0;
-
-        positions.push({ 
-            x: (center.x / width) + offsetX, 
-            y: (1 - center.y / height) + offsetY 
-        });
-        }
-
-        return positions;
-    }
-
     extractHistogramData(histItem, barColor) {
         const { barBorderColor, barBorderWidth } = this.settings;
-
         if (!histItem || !Array.isArray(histItem.fArray)) return null;
 
         const fXaxis = histItem.fXaxis || {};
@@ -319,19 +178,14 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
     }
 
     buildSoccerBallSubplots(histogramsData) {
-        const { barColors, subplotSize, showSubplotLabels, useLogScale } = this.settings;
+        const { barColors, subplotSize, showSubplotLabels, useLogScale, positionOffsetsX, positionOffsetsY } = this.settings;
         const positions = this.getSoccerBallPositions();
         const plotlyTraces = [];
         const annotations = [];
 
         histogramsData.forEach((item, i) => {
         if (!item || !item.histItem || i >= positions.length) return;
-
-        //const pos = positions[i];
-        const { histItem } = item;
-        const color = barColors[i % barColors.length];
-
-        const histData = this.extractHistogramData(histItem, color);
+        const histData = this.extractHistogramData(item.histItem, barColors[i % barColors.length]);
         if (!histData) return;
 
         plotlyTraces.push({
@@ -370,7 +224,7 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         if (i < histogramsData.length && histogramsData[i]) {
             const clampedX = Math.max(subplotSize/2, Math.min(1 - subplotSize/2, pos.x));
             const clampedY = Math.max(subplotSize/2, Math.min(1 - subplotSize/2, pos.y));
-            
+
             const xDomain = [clampedX - subplotSize/2, clampedX + subplotSize/2];
             const yDomain = [clampedY - subplotSize/2, clampedY + subplotSize/2];
 
@@ -400,6 +254,54 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         });
 
         return { data: plotlyTraces, layout };
+    }
+
+    getSoccerBallPositions() {
+        const { positionOffsetsX, positionOffsetsY } = this.settings;
+        const width = 100;
+        const height = 100;
+        const scale = 115;
+        const rotationDeg = 22.5;
+
+        const centroid = soccerBallData.vertices.reduce(
+        (acc, v) => [acc[0] + v[0], acc[1] + v[1]],
+        [0, 0]
+        ).map(c => c / soccerBallData.vertices.length);
+
+        const rad = (rotationDeg * Math.PI) / 180;
+        const cosA = Math.cos(rad);
+        const sinA = Math.sin(rad);
+
+        const transformVertex = v => {
+        const dx = v[0] - centroid[0];
+        const dy = v[1] - centroid[1];
+        const rx = dx * cosA - dy * sinA;
+        const ry = dx * sinA + dy * cosA;
+        return { x: rx * scale + width / 2, y: ry * scale + height / 2 };
+        };
+
+        const vertices = soccerBallData.vertices.map(transformVertex);
+        const positions = [];
+
+        for (let i = 0; i < Math.min(6, soccerBallData.hexagons.length); i++) {
+        const hex = soccerBallData.hexagons[i];
+        const hexVertices = hex.map(idx => vertices[idx]);
+        const center = hexVertices.reduce((acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }), { x:0, y:0 });
+        center.x /= hexVertices.length;
+        center.y /= hexVertices.length;
+        positions.push({ x: (center.x/width)+positionOffsetsX[i]||0, y: (1-(center.y/height))+positionOffsetsY[i]||0 });
+        }
+
+        if (positions.length < 6 && soccerBallData.pentagons.length > 0) {
+        const pent = soccerBallData.pentagons[0];
+        const pentVertices = pent.map(idx => vertices[idx]);
+        const center = pentVertices.reduce((acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }), { x:0, y:0 });
+        center.x /= pentVertices.length;
+        center.y /= pentVertices.length;
+        positions.push({ x: (center.x/width)+positionOffsetsX[positions.length]||0, y: (1-(center.y/height))+positionOffsetsY[positions.length]||0 });
+        }
+
+        return positions;
     }
 
     renderSoccerBallSVG() {
@@ -433,58 +335,25 @@ export default function makeWFD5LysoArrayHistograms({ Figure, SettingTypes }) {
         const hexagons = soccerBallData.hexagons.map(hex => hex.map(i => vertices[i]));
 
         return (
-        <svg
-            width="100%"
-            height="100%"
-            viewBox={`0 0 ${width} ${height}`}
-            style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', zIndex: 10 }}
-        >
+        <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} style={{ position:'absolute', top:0, left:0, pointerEvents:'none', zIndex:10 }}>
             {hexagons.map((hex, idx) => (
-            <polygon
-                key={`hex-${idx}`}
-                points={hex.map(v => `${v.x},${v.y}`).join(' ')}
-                fill="none"
-                stroke={soccerBallLineColor}
-                strokeWidth="2"
-            />
+            <polygon key={`hex-${idx}`} points={hex.map(v=>`${v.x},${v.y}`).join(' ')} fill="none" stroke={soccerBallLineColor} strokeWidth="2" />
             ))}
-            <polygon
-            points={pentagon.map(v => `${v.x},${v.y}`).join(' ')}
-            fill="none"
-            stroke={soccerBallLineColor}
-            strokeWidth="2"
-            />
+            <polygon points={pentagon.map(v=>`${v.x},${v.y}`).join(' ')} fill="none" stroke={soccerBallLineColor} strokeWidth="2" />
         </svg>
         );
     }
 
     render() {
-        const { plotlyData, plotlyLayout, revision, loading, error } = this.state;
+        const { plotlyData, plotlyLayout, revision } = this.state;
+
         return (
-        <div className="no-drag" style={{ width: '100%', height: '100%', position: 'relative' }}>
-            {loading && <p>Loading...</p>}
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-            {!loading && !error && (
-            <>
-                <Plotly
-                data={plotlyData}
-                layout={plotlyLayout}
-                revision={revision}
-                style={{ width: '100%', height: '100%' }}
-                useResizeHandler
-                config={{ responsive: true, displayModeBar: true }}
-                />
-                {this.renderSoccerBallSVG()}
-            </>
-            )}
+        <div className="no-drag" style={{ width:'100%', height:'100%', position:'relative' }}>
+            <Plotly data={plotlyData} layout={plotlyLayout} revision={revision} style={{ width:'100%', height:'100%' }} useResizeHandler config={{ responsive:true, displayModeBar:true }} />
+            {this.renderSoccerBallSVG()}
         </div>
         );
     }
+    }
 
-    async fetchJson(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status} for URL ${url}`);
-        return res.json();
-    }
-    }
 }

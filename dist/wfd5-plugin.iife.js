@@ -6,40 +6,12 @@ var PluginRegister = (function () {
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
   function _arrayWithoutHoles(r) {
     if (Array.isArray(r)) return _arrayLikeToArray(r);
   }
   function _assertThisInitialized(e) {
     if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     return e;
-  }
-  function asyncGeneratorStep(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c),
-        u = i.value;
-    } catch (n) {
-      return void e(n);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator(n) {
-    return function () {
-      var t = this,
-        e = arguments;
-      return new Promise(function (r, o) {
-        var a = n.apply(t, e);
-        function _next(n) {
-          asyncGeneratorStep(a, r, o, _next, _throw, "next", n);
-        }
-        function _throw(n) {
-          asyncGeneratorStep(a, r, o, _next, _throw, "throw", n);
-        }
-        _next(void 0);
-      });
-    };
   }
   function _callSuper(t, o, e) {
     return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e));
@@ -103,33 +75,6 @@ var PluginRegister = (function () {
   function _iterableToArray(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e,
-        n,
-        i,
-        u,
-        a = [],
-        f = true,
-        o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-      } catch (r) {
-        o = true, n = r;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
@@ -159,123 +104,10 @@ var PluginRegister = (function () {
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized(t);
   }
-  function _regenerator() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e,
-      t,
-      r = "function" == typeof Symbol ? Symbol : {},
-      n = r.iterator || "@@iterator",
-      o = r.toStringTag || "@@toStringTag";
-    function i(r, n, o, i) {
-      var c = n && n.prototype instanceof Generator ? n : Generator,
-        u = Object.create(c.prototype);
-      return _regeneratorDefine(u, "_invoke", function (r, n, o) {
-        var i,
-          c,
-          u,
-          f = 0,
-          p = o || [],
-          y = false,
-          G = {
-            p: 0,
-            n: 0,
-            v: e,
-            a: d,
-            f: d.bind(e, 4),
-            d: function (t, r) {
-              return i = t, c = 0, u = e, G.n = r, a;
-            }
-          };
-        function d(r, n) {
-          for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) {
-            var o,
-              i = p[t],
-              d = G.p,
-              l = i[2];
-            r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0));
-          }
-          if (o || r > 1) return a;
-          throw y = true, n;
-        }
-        return function (o, p, l) {
-          if (f > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) {
-            i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u);
-            try {
-              if (f = 2, i) {
-                if (c || (o = "next"), t = i[o]) {
-                  if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u = t.value, c < 2 && (c = 0);
-                } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
-                i = e;
-              } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
-            } catch (t) {
-              i = e, c = 1, u = t;
-            } finally {
-              f = 1;
-            }
-          }
-          return {
-            value: t,
-            done: y
-          };
-        };
-      }(r, o, i), true), u;
-    }
-    var a = {};
-    function Generator() {}
-    function GeneratorFunction() {}
-    function GeneratorFunctionPrototype() {}
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine(t = {}, n, function () {
-        return this;
-      }), t),
-      u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine(u), _regeneratorDefine(u, o, "Generator"), _regeneratorDefine(u, n, function () {
-      return this;
-    }), _regeneratorDefine(u, "toString", function () {
-      return "[object Generator]";
-    }), (_regenerator = function () {
-      return {
-        w: i,
-        m: f
-      };
-    })();
-  }
-  function _regeneratorDefine(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e) {
-      i = 0;
-    }
-    _regeneratorDefine = function (e, r, n, t) {
-      if (r) i ? i(e, r, {
-        value: n,
-        enumerable: !t,
-        configurable: !t,
-        writable: !t
-      }) : e[r] = n;else {
-        function o(r, n) {
-          _regeneratorDefine(e, r, function (e) {
-            return this._invoke(r, n, e);
-          });
-        }
-        o("next", 0), o("throw", 1), o("return", 2);
-      }
-    }, _regeneratorDefine(e, r, n, t);
-  }
   function _setPrototypeOf(t, e) {
     return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
       return t.__proto__ = e, t;
     }, _setPrototypeOf(t, e);
-  }
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
   function _superPropBase(t, o) {
     for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf(t)););
@@ -537,6 +369,13 @@ var PluginRegister = (function () {
         key: "settingSchema",
         get: function get() {
           return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5IntegralHistogram, "settingSchema", this)), {}, {
+            dataUrl: {
+              type: SettingTypes.STRING,
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              label: 'Data URL',
+              onChange: 'onUpdateTick',
+              advanced: true
+            },
             // Basic bar style
             barColor: {
               type: SettingTypes.COLOR,
@@ -590,13 +429,6 @@ var PluginRegister = (function () {
               "default": 0,
               label: 'Channel #',
               onChange: 'onUpdateTick'
-            },
-            dataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
-              label: 'Data URL',
-              onChange: 'onUpdateTick',
-              advanced: true
             },
             useLogScale: {
               type: SettingTypes.BOOLEAN,
@@ -918,7 +750,7 @@ var PluginRegister = (function () {
           return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
             dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+              "default": 'http://localhost:3001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
               label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
@@ -1051,379 +883,125 @@ var PluginRegister = (function () {
     var Figure = _ref.Figure,
       SettingTypes = _ref.SettingTypes;
     return _WFD5Waveform = /*#__PURE__*/function (_Figure) {
-      function WFD5Waveform(props) {
-        var _this;
+      function WFD5Waveform() {
         _classCallCheck(this, WFD5Waveform);
-        _this = _callSuper(this, WFD5Waveform, [props]);
-        _this.state = {
-          data: [],
-          layout: {},
-          revision: 0,
-          loading: true,
-          error: null
-        };
-        _this.latestTraceRaw = null;
-        _this.latestIntegralRaw = null;
-        return _this;
+        return _callSuper(this, WFD5Waveform, arguments);
       }
       _inherits(WFD5Waveform, _Figure);
       return _createClass(WFD5Waveform, [{
-        key: "onInit",
-        value: function () {
-          var _onInit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-            var _yield$Promise$all, _yield$Promise$all2, traceRaw, integralRaw, _this$formatPlotly, data, layout, _t;
-            return _regenerator().w(function (_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  _context.p = 0;
-                  _context.n = 1;
-                  return Promise.all([this.fetchJson(this.settings.traceDataUrl), this.fetchJson(this.settings.integralDataUrl)]);
-                case 1:
-                  _yield$Promise$all = _context.v;
-                  _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
-                  traceRaw = _yield$Promise$all2[0];
-                  integralRaw = _yield$Promise$all2[1];
-                  this.latestTraceRaw = traceRaw;
-                  this.latestIntegralRaw = integralRaw;
-                  _this$formatPlotly = this.formatPlotly(traceRaw, integralRaw), data = _this$formatPlotly.data, layout = _this$formatPlotly.layout;
-                  this.setState({
-                    data: data,
-                    layout: layout,
-                    loading: false,
-                    error: null,
-                    revision: 0
-                  });
-                  _context.n = 3;
-                  break;
-                case 2:
-                  _context.p = 2;
-                  _t = _context.v;
-                  this.setState({
-                    error: _t.message,
-                    loading: false
-                  });
-                case 3:
-                  return _context.a(2);
-              }
-            }, _callee, this, [[0, 2]]);
-          }));
-          function onInit() {
-            return _onInit.apply(this, arguments);
-          }
-          return onInit;
-        }()
-      }, {
-        key: "onUpdateTick",
-        value: function () {
-          var _onUpdateTick = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-            var _yield$Promise$all3, _yield$Promise$all4, traceRaw, integralRaw, _this$formatPlotly2, data, newLayout, _t2;
-            return _regenerator().w(function (_context2) {
-              while (1) switch (_context2.n) {
-                case 0:
-                  _context2.p = 0;
-                  _context2.n = 1;
-                  return Promise.all([this.fetchJson(this.settings.traceDataUrl), this.fetchJson(this.settings.integralDataUrl)]);
-                case 1:
-                  _yield$Promise$all3 = _context2.v;
-                  _yield$Promise$all4 = _slicedToArray(_yield$Promise$all3, 2);
-                  traceRaw = _yield$Promise$all4[0];
-                  integralRaw = _yield$Promise$all4[1];
-                  this.latestTraceRaw = traceRaw;
-                  this.latestIntegralRaw = integralRaw;
-                  _this$formatPlotly2 = this.formatPlotly(traceRaw, integralRaw), data = _this$formatPlotly2.data, newLayout = _this$formatPlotly2.layout;
-                  this.setState(function (prev) {
-                    return {
-                      data: data,
-                      layout: _objectSpread2(_objectSpread2({}, prev.layout), {}, {
-                        shapes: newLayout.shapes,
-                        annotations: newLayout.annotations,
-                        yaxis: newLayout.yaxis,
-                        xaxis: newLayout.xaxis
-                      }),
-                      error: null,
-                      revision: prev.revision + 1
-                    };
-                  });
-                  _context2.n = 3;
-                  break;
-                case 2:
-                  _context2.p = 2;
-                  _t2 = _context2.v;
-                  this.setState({
-                    error: _t2.message
-                  });
-                case 3:
-                  return _context2.a(2);
-              }
-            }, _callee2, this, [[0, 2]]);
-          }));
-          function onUpdateTick() {
-            return _onUpdateTick.apply(this, arguments);
-          }
-          return onUpdateTick;
-        }()
-      }, {
-        key: "onLayoutUpdate",
-        value: function onLayoutUpdate() {
-          if (this.latestTraceRaw && this.latestIntegralRaw) {
-            var _this$formatPlotly3 = this.formatPlotly(this.latestTraceRaw, this.latestIntegralRaw),
-              data = _this$formatPlotly3.data,
-              layout = _this$formatPlotly3.layout;
-            this.setState(function (prev) {
-              return {
-                data: data,
-                layout: layout,
-                revision: prev.revision + 1
-              };
-            });
-          }
+        key: "onDataReceived",
+        value: function onDataReceived(waveformRaw) {
+          if (!waveformRaw) return;
+          var _this$formatPlotly = this.formatPlotly(waveformRaw),
+            data = _this$formatPlotly.data,
+            layout = _this$formatPlotly.layout;
+          this.setState(function (prev) {
+            return {
+              data: data,
+              layout: layout,
+              revision: (prev.revision || 0) + 1
+            };
+          });
         }
       }, {
-        key: "updateSetting",
-        value: function updateSetting(key, value) {
-          var _this$onUpdateFrequen;
-          var schema = this.constructor.settingSchema[key];
-          var processedValue = value;
-          if (schema) {
-            switch (schema.type) {
-              case SettingTypes.NUMBER:
-                processedValue = Number(value);
-                if (isNaN(processedValue)) processedValue = schema["default"];
-                break;
-              case SettingTypes.INT:
-                processedValue = parseInt(value);
-                if (isNaN(processedValue)) processedValue = schema["default"];
-                break;
-              case SettingTypes.BOOLEAN:
-                processedValue = typeof value === 'string' ? value.toLowerCase() === 'true' : Boolean(value);
-                break;
-              case SettingTypes.STRING:
-              case SettingTypes.COLOR:
-                processedValue = String(value);
-                break;
-            }
-          }
-          this.settings = _objectSpread2(_objectSpread2({}, this.settings), {}, _defineProperty({}, key, processedValue));
-          var onChange = schema === null || schema === void 0 ? void 0 : schema.onChange;
-          if (onChange === 'onUpdateTick') this.onUpdateTick();else if (onChange === 'onLayoutUpdate') this.onLayoutUpdate();else if (onChange === 'onUpdateFrequencyChange') (_this$onUpdateFrequen = this.onUpdateFrequencyChange) === null || _this$onUpdateFrequen === void 0 || _this$onUpdateFrequen.call(this, processedValue);
-          this.forceUpdate();
+        key: "onDataError",
+        value: function onDataError(error) {
+          this.setState({
+            error: error
+          });
         }
-      }, {
-        key: "fetchJson",
-        value: function () {
-          var _fetchJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(url) {
-            var res;
-            return _regenerator().w(function (_context3) {
-              while (1) switch (_context3.n) {
-                case 0:
-                  _context3.n = 1;
-                  return fetch(url);
-                case 1:
-                  res = _context3.v;
-                  if (res.ok) {
-                    _context3.n = 2;
-                    break;
-                  }
-                  throw new Error("HTTP error ".concat(res.status, " for URL ").concat(url));
-                case 2:
-                  return _context3.a(2, res.json());
-              }
-            }, _callee3);
-          }));
-          function fetchJson(_x) {
-            return _fetchJson.apply(this, arguments);
-          }
-          return fetchJson;
-        }()
       }, {
         key: "formatPlotly",
-        value: function formatPlotly(traceRaw, integralRaw) {
-          var _this2 = this,
-            _traceRaw$data,
-            _integralRaw$data;
+        value: function formatPlotly(waveformRaw) {
+          var _waveformRaw$data;
           var s = this.settings;
-          var findMatchingItem = function findMatchingItem(list) {
-            if (!Array.isArray(list)) return {
-              match: null,
-              method: null
-            };
-            var match = null;
-            var method = null;
-            var settingsToUpdate = {};
-
-            // Try detector/subdetector first
-            if (s.detectorSystem && s.subdetector) {
-              match = list.find(function (item) {
-                return item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector;
-              });
-              if (match) {
-                method = 'detector';
-                // Sync channel info from matched item
-                var channelInfo = _objectSpread2(_objectSpread2(_objectSpread2({}, match.crateNum != null && {
-                  crate: match.crateNum
-                }), match.amcNum != null && {
-                  amcSlot: match.amcNum
-                }), match.channelTag != null && {
-                  channel: match.channelTag
-                });
-                settingsToUpdate = _objectSpread2(_objectSpread2({}, settingsToUpdate), channelInfo);
-              }
+          var list = waveformRaw === null || waveformRaw === void 0 || (_waveformRaw$data = waveformRaw.data) === null || _waveformRaw$data === void 0 ? void 0 : _waveformRaw$data.arr;
+          if (!(list !== null && list !== void 0 && list.length)) return {
+            data: [],
+            layout: {
+              title: 'No waveform data',
+              autosize: true
             }
-
-            // Fall back to crate/amc/channel
-            if (!match && (s.crate || s.amcSlot || s.channel)) {
-              match = list.find(function (item) {
-                return item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel;
-              });
-              if (match) {
-                method = 'channel';
-                // Sync detector info from matched item
-                var detectorInfo = _objectSpread2(_objectSpread2({}, match.detectorSystem && {
-                  detectorSystem: match.detectorSystem
-                }), match.subdetector && {
-                  subdetector: match.subdetector
-                });
-                settingsToUpdate = _objectSpread2(_objectSpread2({}, settingsToUpdate), detectorInfo);
-              }
-            }
-
-            // Update settings if we found complementary info
-            if (Object.keys(settingsToUpdate).length > 0) {
-              var newSettings = _objectSpread2(_objectSpread2({}, s), settingsToUpdate);
-
-              // Check if any settings actually changed to avoid infinite loops
-              var hasChanges = Object.keys(settingsToUpdate).some(function (key) {
-                return s[key] !== settingsToUpdate[key];
-              });
-              if (hasChanges && typeof _this2.props.onSettingsCorrected === 'function') {
-                console.log("[".concat(_this2.id, "] Auto-syncing settings via ").concat(method, " match:"), settingsToUpdate);
-                // Use setTimeout to avoid updating during render
-                setTimeout(function () {
-                  _this2.props.onSettingsCorrected(newSettings);
-                }, 0);
-              }
-            }
-            return {
-              match: match,
-              method: method
-            };
           };
-          var traceList = traceRaw === null || traceRaw === void 0 || (_traceRaw$data = traceRaw.data) === null || _traceRaw$data === void 0 ? void 0 : _traceRaw$data.arr;
-          var integralList = integralRaw === null || integralRaw === void 0 || (_integralRaw$data = integralRaw.data) === null || _integralRaw$data === void 0 ? void 0 : _integralRaw$data.arr;
-          var _findMatchingItem = findMatchingItem(traceList),
-            traceItem = _findMatchingItem.match;
-          var _findMatchingItem2 = findMatchingItem(integralList),
-            integralItem = _findMatchingItem2.match;
-          if (!traceItem || !Array.isArray(traceItem.trace)) {
-            return {
-              data: [],
-              layout: {
-                title: 'No trace data available',
-                autosize: true,
-                margin: {
-                  t: 50,
-                  r: 20,
-                  l: 60,
-                  b: 40
-                }
-              }
-            };
-          }
-
-          // Process trace data - subtract pedestal if enabled
-          var processedTrace = _toConsumableArray(traceItem.trace);
-          var adjustedPedestalLevel = integralItem === null || integralItem === void 0 ? void 0 : integralItem.pedestalLevel;
-          if (s.subtractPedestal && integralItem && typeof integralItem.pedestalLevel === 'number') {
-            processedTrace = traceItem.trace.map(function (value) {
-              return value - integralItem.pedestalLevel;
+          var wfItem = list.find(function (item) {
+            return s.detectorSystem && s.subdetector && item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector || item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel;
+          });
+          if (!(wfItem !== null && wfItem !== void 0 && wfItem.trace)) return {
+            data: [],
+            layout: {
+              title: 'No matching trace',
+              autosize: true
+            }
+          };
+          var processedTrace = _toConsumableArray(wfItem.trace);
+          var pedestal = wfItem.pedestalLevel;
+          if (s.subtractPedestal && typeof pedestal === 'number') {
+            processedTrace = processedTrace.map(function (v) {
+              return v - pedestal;
             });
-            adjustedPedestalLevel = 0; // Pedestal line should be at zero when subtracted
+            pedestal = 0;
           }
           var traceData = {
             type: 'scatter',
             mode: 'lines',
-            x: traceItem.trace.map(function (_, i) {
+            x: processedTrace.map(function (_, i) {
               return i;
             }),
             y: processedTrace,
-            name: "".concat(traceItem.detectorSystem || 'N/A', " ").concat(traceItem.subdetector || '', " (Crate ").concat(traceItem.crateNum, ", AMC ").concat(traceItem.amcNum, ", Ch ").concat(traceItem.channelTag, ")"),
             line: {
               color: s.traceColor
-            },
-            hoverinfo: 'x+y+name'
+            }
           };
           var shapes = [];
           var annotations = [];
-          if (integralItem && s.showIntegralBounds) {
-            var _ref2 = integralItem.integration_window || {},
-              startSample = _ref2.first,
-              endSample = _ref2.second;
-            if (startSample != null && endSample != null) {
-              var yMin = Math.min.apply(Math, _toConsumableArray(processedTrace));
-              var yMax = Math.max.apply(Math, _toConsumableArray(processedTrace));
-              if (s.showIntegralFill) {
-                shapes.push({
-                  type: 'rect',
-                  xref: 'x',
-                  x0: startSample,
-                  x1: endSample,
-                  yref: 'y',
-                  y0: yMin,
-                  y1: yMax,
-                  fillcolor: s.integralFillColor,
-                  line: {
-                    width: 0
-                  }
-                });
+          if (s.showIntegralBounds && wfItem.integration_window) {
+            var _wfItem$integration_w = wfItem.integration_window,
+              start = _wfItem$integration_w.first,
+              end = _wfItem$integration_w.second;
+            if (s.showIntegralFill) shapes.push({
+              type: 'rect',
+              x0: start,
+              x1: end,
+              y0: Math.min.apply(Math, _toConsumableArray(processedTrace)),
+              y1: Math.max.apply(Math, _toConsumableArray(processedTrace)),
+              fillcolor: s.integralFillColor,
+              line: {
+                width: 0
               }
-              shapes.push({
-                type: 'line',
-                x0: startSample,
-                x1: startSample,
-                y0: yMin,
-                y1: yMax,
-                line: {
-                  color: s.integralLineColor,
-                  width: s.integralLineWidth,
-                  dash: s.integralLineDash
-                }
-              }, {
-                type: 'line',
-                x0: endSample,
-                x1: endSample,
-                y0: yMin,
-                y1: yMax,
-                line: {
-                  color: s.integralLineColor,
-                  width: s.integralLineWidth,
-                  dash: s.integralLineDash
-                }
-              });
-              if (s.showIntegralWindowText) {
-                annotations.push({
-                  x: (startSample + endSample) / 2,
-                  y: 1.02,
-                  xref: 'x',
-                  yref: 'paper',
-                  text: "Integration Window: [".concat(startSample, ", ").concat(endSample, "]"),
-                  showarrow: false,
-                  font: {
-                    size: 12,
-                    color: s.integralLineColor
-                  },
-                  align: 'center'
-                });
+            });
+            shapes.push({
+              type: 'line',
+              x0: start,
+              x1: start,
+              y0: Math.min.apply(Math, _toConsumableArray(processedTrace)),
+              y1: Math.max.apply(Math, _toConsumableArray(processedTrace)),
+              line: {
+                color: s.integralLineColor,
+                width: s.integralLineWidth,
+                dash: s.integralLineDash
               }
-            }
+            });
+            shapes.push({
+              type: 'line',
+              x0: end,
+              x1: end,
+              y0: Math.min.apply(Math, _toConsumableArray(processedTrace)),
+              y1: Math.max.apply(Math, _toConsumableArray(processedTrace)),
+              line: {
+                color: s.integralLineColor,
+                width: s.integralLineWidth,
+                dash: s.integralLineDash
+              }
+            });
           }
-          if (integralItem && s.showPedestal && typeof adjustedPedestalLevel === 'number') {
+          if (s.showPedestal && typeof pedestal === 'number') {
             shapes.push({
               type: 'line',
               x0: 0,
               x1: 1,
               xref: 'paper',
-              y0: adjustedPedestalLevel,
-              y1: adjustedPedestalLevel,
+              y0: pedestal,
+              y1: pedestal,
               line: {
                 color: s.pedestalLineColor,
                 width: s.pedestalLineWidth,
@@ -1431,62 +1009,33 @@ var PluginRegister = (function () {
               }
             });
           }
-          if (integralItem && s.showPedestalStdev && typeof integralItem.pedestalStdev === 'number') {
-            var pedestal = adjustedPedestalLevel;
-            var stdev = integralItem.pedestalStdev;
+          if (s.showPedestalStdev && typeof wfItem.pedestalStdev === 'number') {
             shapes.push({
               type: 'rect',
-              xref: 'paper',
               x0: 0,
               x1: 1,
-              y0: pedestal - stdev,
-              y1: pedestal + stdev,
+              xref: 'paper',
+              y0: pedestal - wfItem.pedestalStdev,
+              y1: pedestal + wfItem.pedestalStdev,
               fillcolor: s.pedestalStdevFillColor,
               line: {
                 width: 0
               }
             });
           }
-          if (integralItem && s.showIntegralInfoBox) {
-            var _integralItem$integra, _integralItem$amplitu;
+          if (s.showIntegralInfoBox) {
+            var _wfItem$integral, _wfItem$amplitude;
             annotations.push({
               x: s.integralInfoBoxX,
               y: s.integralInfoBoxY,
               xref: 'paper',
               yref: 'paper',
-              text: "Integral: ".concat(((_integralItem$integra = integralItem.integral) === null || _integralItem$integra === void 0 ? void 0 : _integralItem$integra.toFixed(2)) || 'N/A', "<br>") + "Amplitude: ".concat(((_integralItem$amplitu = integralItem.amplitude) === null || _integralItem$amplitu === void 0 ? void 0 : _integralItem$amplitu.toFixed(2)) || 'N/A', "<br>") + "Peak Time: ".concat(integralItem.peak_time || 'N/A'),
+              text: "Integral: ".concat(((_wfItem$integral = wfItem.integral) === null || _wfItem$integral === void 0 ? void 0 : _wfItem$integral.toFixed(2)) || 'N/A', "<br>Amplitude: ").concat(((_wfItem$amplitude = wfItem.amplitude) === null || _wfItem$amplitude === void 0 ? void 0 : _wfItem$amplitude.toFixed(2)) || 'N/A', "<br>Peak: ").concat(wfItem.peak_time || 'N/A'),
               showarrow: false,
-              font: {
-                size: 12,
-                color: 'black'
-              },
-              align: 'left',
               bgcolor: s.integralInfoBoxBgColor,
               bordercolor: s.integralInfoBoxBorderColor,
               borderwidth: 1
             });
-          }
-
-          // Configure Y-axis based on fixYAxis setting
-          var yaxis = {
-            title: 'ADC Value'
-          };
-          if (s.fixYAxis) {
-            yaxis.range = [s.yAxisMin, s.yAxisMax];
-            yaxis.autorange = false;
-          } else {
-            yaxis.autorange = true;
-          }
-
-          // Configure X-axis based on fixXAxis setting
-          var xaxis = {
-            title: 'Sample Number'
-          };
-          if (s.fixXAxis) {
-            xaxis.range = [s.xAxisMin, s.xAxisMax];
-            xaxis.autorange = false;
-          } else {
-            xaxis.autorange = true;
           }
           var layout = {
             autosize: true,
@@ -1496,11 +1045,15 @@ var PluginRegister = (function () {
               l: 60,
               b: 40
             },
-            xaxis: xaxis,
-            yaxis: yaxis,
-            legend: {
-              orientation: 'h',
-              y: -0.15
+            xaxis: {
+              title: 'Sample',
+              autorange: !s.fixXAxis,
+              range: s.fixXAxis ? [s.xAxisMin, s.xAxisMax] : undefined
+            },
+            yaxis: {
+              title: 'ADC',
+              autorange: !s.fixYAxis,
+              range: s.fixYAxis ? [s.yAxisMin, s.yAxisMax] : undefined
             },
             shapes: shapes,
             annotations: annotations
@@ -1514,22 +1067,18 @@ var PluginRegister = (function () {
         key: "render",
         value: function render() {
           var _this$state = this.state,
+            loading = _this$state.loading,
+            error = _this$state.error,
             data = _this$state.data,
             layout = _this$state.layout,
-            revision = _this$state.revision,
-            loading = _this$state.loading,
-            error = _this$state.error;
-          return /*#__PURE__*/React.createElement("div", {
-            className: "no-drag",
-            style: {
-              width: '100%',
-              height: '100%'
-            }
-          }, loading && /*#__PURE__*/React.createElement("p", null, "Loading..."), error && /*#__PURE__*/React.createElement("p", {
+            revision = _this$state.revision;
+          if (loading) return /*#__PURE__*/React.createElement("div", null, "Loading...");
+          if (error) return /*#__PURE__*/React.createElement("div", {
             style: {
               color: 'red'
             }
-          }, "Error: ", error), !loading && !error && /*#__PURE__*/React.createElement(Plotly, {
+          }, "Error: ", error);
+          return /*#__PURE__*/React.createElement(Plotly, {
             data: data,
             layout: layout,
             revision: revision,
@@ -1539,48 +1088,27 @@ var PluginRegister = (function () {
             },
             useResizeHandler: true,
             config: {
-              responsive: true,
-              modeBarButtonsToRemove: ['select2d', 'lasso2d']
+              responsive: true
             }
-          }));
+          });
         }
       }], [{
         key: "settingSchema",
         get: function get() {
-          return {
-            // Data URLs
-            traceDataUrl: {
+          return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5Waveform, "settingSchema", this)), {}, {
+            dataUrl: {
               type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
-              label: 'Trace Data URL',
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              label: 'Data URL',
               onChange: 'onUpdateTick',
               advanced: true
             },
-            integralDataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
-              label: 'Integral Data URL',
-              onChange: 'onUpdateTick',
-              advanced: true
-            },
-            // Plot refresh speed
-            updateFrequency: {
-              type: SettingTypes.NUMBER,
-              "default": 2,
-              label: 'Update Interval (s)',
-              onChange: 'onUpdateFrequencyChange',
-              advanced: false
-            },
-            // Basic trace style
             traceColor: {
               type: SettingTypes.COLOR,
               "default": 'rgba(70,130,180,1)',
-              // steelblue
               label: 'Trace Color',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              onChange: 'onLayoutUpdate'
             },
-            // Detector selection
             detectorSystem: {
               type: SettingTypes.STRING,
               "default": '',
@@ -1611,7 +1139,6 @@ var PluginRegister = (function () {
               label: 'Channel #',
               onChange: 'onUpdateTick'
             },
-            // Visual toggles
             showIntegralBounds: {
               type: SettingTypes.BOOLEAN,
               "default": true,
@@ -1622,8 +1149,7 @@ var PluginRegister = (function () {
               type: SettingTypes.BOOLEAN,
               "default": true,
               label: 'Fill Integral Region',
-              onChange: 'onLayoutUpdate',
-              advanced: true
+              onChange: 'onLayoutUpdate'
             },
             showPedestal: {
               type: SettingTypes.BOOLEAN,
@@ -1643,13 +1169,11 @@ var PluginRegister = (function () {
               label: 'Show Integral Info Box',
               onChange: 'onLayoutUpdate'
             },
-            // Y axis settings
             subtractPedestal: {
               type: SettingTypes.BOOLEAN,
               "default": false,
               label: 'Subtract Pedestal',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              onChange: 'onLayoutUpdate'
             },
             fixYAxis: {
               type: SettingTypes.BOOLEAN,
@@ -1661,7 +1185,6 @@ var PluginRegister = (function () {
             yAxisMin: {
               type: SettingTypes.NUMBER,
               "default": -2048,
-              // -2^11
               label: 'Y Axis Min',
               onChange: 'onLayoutUpdate',
               advanced: true
@@ -1669,12 +1192,10 @@ var PluginRegister = (function () {
             yAxisMax: {
               type: SettingTypes.NUMBER,
               "default": 2048,
-              // 2^11
               label: 'Y Axis Max',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // X axis settings
             fixXAxis: {
               type: SettingTypes.BOOLEAN,
               "default": false,
@@ -1696,7 +1217,6 @@ var PluginRegister = (function () {
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // Advanced visual style
             pedestalLineColor: {
               type: SettingTypes.COLOR,
               "default": 'black',
@@ -1777,21 +1297,21 @@ var PluginRegister = (function () {
             integralInfoBoxX: {
               type: SettingTypes.NUMBER,
               "default": 0.02,
-              label: 'Integral Info Box X (paper coords)',
+              label: 'Integral Info Box X',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
             integralInfoBoxY: {
               type: SettingTypes.NUMBER,
               "default": 0.98,
-              label: 'Integral Info Box Y (paper coords)',
+              label: 'Integral Info Box Y',
               onChange: 'onLayoutUpdate',
               advanced: true
             }
-          };
+          });
         }
       }]);
-    }(Figure), _defineProperty(_WFD5Waveform, "displayName", 'WFD5 Waveform'), _defineProperty(_WFD5Waveform, "name", 'WFD5Waveform'), _WFD5Waveform;
+    }(Figure), _defineProperty(_WFD5Waveform, "displayName", 'WFD5 Waveform '), _defineProperty(_WFD5Waveform, "name", 'WFD5Waveform'), _WFD5Waveform;
   }
 
   var vertices = [
@@ -2179,114 +1699,38 @@ var PluginRegister = (function () {
         var _this;
         _classCallCheck(this, WFD5LysoArrayHistograms);
         _this = _callSuper(this, WFD5LysoArrayHistograms, [props]);
-        _this.state = {
-          histogramsData: [],
-          plotlyData: [],
-          plotlyLayout: {},
-          revision: 0,
-          loading: true,
-          error: null
-        };
         _this.latestHistogramRaw = null;
+        _this.state.plotlyData = [];
+        _this.state.plotlyLayout = {};
+        _this.state.revision = 0;
         return _this;
       }
       _inherits(WFD5LysoArrayHistograms, _Figure);
       return _createClass(WFD5LysoArrayHistograms, [{
-        key: "onInit",
-        value: function () {
-          var _onInit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-            var histogramRaw, _this$processHistogra, data, layout, _t;
-            return _regenerator().w(function (_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  _context.p = 0;
-                  _context.n = 1;
-                  return this.fetchJson(this.settings.histogramDataUrl);
-                case 1:
-                  histogramRaw = _context.v;
-                  this.latestHistogramRaw = histogramRaw;
-                  _this$processHistogra = this.processHistogramData(histogramRaw), data = _this$processHistogra.data, layout = _this$processHistogra.layout;
-                  this.setState({
-                    plotlyData: data,
-                    plotlyLayout: layout,
-                    loading: false,
-                    error: null,
-                    revision: 0
-                  });
-                  _context.n = 3;
-                  break;
-                case 2:
-                  _context.p = 2;
-                  _t = _context.v;
-                  this.setState({
-                    error: _t.message,
-                    loading: false
-                  });
-                case 3:
-                  return _context.a(2);
-              }
-            }, _callee, this, [[0, 2]]);
-          }));
-          function onInit() {
-            return _onInit.apply(this, arguments);
-          }
-          return onInit;
-        }()
-      }, {
-        key: "onUpdateTick",
-        value: function () {
-          var _onUpdateTick = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-            var histogramRaw, _this$processHistogra2, data, _t2;
-            return _regenerator().w(function (_context2) {
-              while (1) switch (_context2.n) {
-                case 0:
-                  _context2.p = 0;
-                  _context2.n = 1;
-                  return this.fetchJson(this.settings.histogramDataUrl);
-                case 1:
-                  histogramRaw = _context2.v;
-                  this.latestHistogramRaw = histogramRaw;
-                  _this$processHistogra2 = this.processHistogramData(histogramRaw), data = _this$processHistogra2.data;
-                  this.setState(function (prev) {
-                    return {
-                      plotlyData: data,
-                      error: null,
-                      revision: prev.revision + 1
-                    };
-                  });
-                  _context2.n = 3;
-                  break;
-                case 2:
-                  _context2.p = 2;
-                  _t2 = _context2.v;
-                  this.setState({
-                    error: _t2.message
-                  });
-                case 3:
-                  return _context2.a(2);
-              }
-            }, _callee2, this, [[0, 2]]);
-          }));
-          function onUpdateTick() {
-            return _onUpdateTick.apply(this, arguments);
-          }
-          return onUpdateTick;
-        }()
+        key: "onDataReceived",
+        value: function onDataReceived(histogramRaw) {
+          this.latestHistogramRaw = histogramRaw;
+          var _this$processHistogra = this.processHistogramData(histogramRaw),
+            data = _this$processHistogra.data,
+            layout = _this$processHistogra.layout;
+          this.setState({
+            plotlyData: data,
+            plotlyLayout: layout,
+            revision: this.state.revision + 1
+          });
+        }
       }, {
         key: "onLayoutUpdate",
         value: function onLayoutUpdate() {
-          if (this.latestHistogramRaw) {
-            var _this$processHistogra3 = this.processHistogramData(this.latestHistogramRaw),
-              data = _this$processHistogra3.data,
-              layout = _this$processHistogra3.layout;
-            this.setState(function (prev) {
-              return {
-                plotlyData: data,
-                plotlyLayout: layout,
-                revision: prev.revision + 1
-              };
-            });
-          }
+          if (!this.latestHistogramRaw) return;
+          var _this$processHistogra2 = this.processHistogramData(this.latestHistogramRaw),
+            data = _this$processHistogra2.data,
+            layout = _this$processHistogra2.layout;
+          this.setState({
+            plotlyData: data,
+            plotlyLayout: layout,
+            revision: this.state.revision + 1
+          });
         }
       }, {
         key: "processHistogramData",
@@ -2299,24 +1743,16 @@ var PluginRegister = (function () {
             var subdetector = subdetectors[i];
             var histList = histogramRaw === null || histogramRaw === void 0 || (_histogramRaw$data = histogramRaw.data) === null || _histogramRaw$data === void 0 ? void 0 : _histogramRaw$data.arr;
             if (!Array.isArray(histList)) return null;
-
-            // Escape special regex characters in detector system and subdetector names
             var escapedDetector = detectorSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             var escapedSubdetector = subdetector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-            // Create more precise regex patterns with word boundaries
-            // This pattern ensures we match the exact detector and subdetector values
             var detectorPattern = "det[_\\s]*".concat(escapedDetector, "(?:[_\\s]|$)");
             var subdetectorPattern = "subdet[_\\s]*".concat(escapedSubdetector, "(?:[_\\s]|$)");
-
-            // Combined pattern that requires both detector and subdetector to match precisely
             var combinedPattern = new RegExp("(?=.*".concat(detectorPattern, ")(?=.*").concat(subdetectorPattern, ")"), 'i');
             var histItem = histList.find(function (h) {
               var _h$fName, _h$fTitle;
               var name = (_h$fName = h.fName) !== null && _h$fName !== void 0 ? _h$fName : '';
               var title = (_h$fTitle = h.fTitle) !== null && _h$fTitle !== void 0 ? _h$fTitle : '';
-              var fullText = "".concat(name, " ").concat(title);
-              return combinedPattern.test(fullText);
+              return combinedPattern.test("".concat(name, " ").concat(title));
             });
             return histItem ? {
               histItem: histItem,
@@ -2334,104 +1770,12 @@ var PluginRegister = (function () {
           };
         }
       }, {
-        key: "extractChannelInfo",
-        value: function extractChannelInfo(name, title) {
-          var text = "".concat(name, " ").concat(title).toLowerCase();
-          // Use word boundaries to ensure exact number matches
-          var crateMatch = text.match(/crate[_\s]*(\d+)(?:[_\s]|$)/);
-          var amcMatch = text.match(/amc[_\s]*(\d+)(?:[_\s]|$)/);
-          var channelMatch = text.match(/ch[_\s]*(\d+)(?:[_\s]|$)/);
-          var info = {};
-          if (crateMatch) info.crate = parseInt(crateMatch[1], 10);
-          if (amcMatch) info.amcSlot = parseInt(amcMatch[1], 10);
-          if (channelMatch) info.channel = parseInt(channelMatch[1], 10);
-          return info;
-        }
-      }, {
-        key: "getSoccerBallPositions",
-        value: function getSoccerBallPositions() {
-          var _this$settings2 = this.settings,
-            positionOffsetsX = _this$settings2.positionOffsetsX,
-            positionOffsetsY = _this$settings2.positionOffsetsY;
-          var width = 100;
-          var height = 100;
-          var scale = 115;
-          var rotationDeg = 22.5;
-          var centroid = soccerBallData.vertices.reduce(function (acc, v) {
-            return [acc[0] + v[0], acc[1] + v[1]];
-          }, [0, 0]).map(function (c) {
-            return c / soccerBallData.vertices.length;
-          });
-          var rad = rotationDeg * Math.PI / 180;
-          var cosA = Math.cos(rad);
-          var sinA = Math.sin(rad);
-          var transformVertex = function transformVertex(v) {
-            var dx = v[0] - centroid[0];
-            var dy = v[1] - centroid[1];
-            var rx = dx * cosA - dy * sinA;
-            var ry = dx * sinA + dy * cosA;
-            return {
-              x: rx * scale + width / 2,
-              y: ry * scale + height / 2
-            };
-          };
-          var vertices = soccerBallData.vertices.map(transformVertex);
-          var positions = [];
-          for (var i = 0; i < Math.min(6, soccerBallData.hexagons.length); i++) {
-            var hex = soccerBallData.hexagons[i];
-            var hexVertices = hex.map(function (idx) {
-              return vertices[idx];
-            });
-            var center = hexVertices.reduce(function (acc, v) {
-              return {
-                x: acc.x + v.x,
-                y: acc.y + v.y
-              };
-            }, {
-              x: 0,
-              y: 0
-            });
-            center.x /= hexVertices.length;
-            center.y /= hexVertices.length;
-            var offsetX = positionOffsetsX[i] || 0;
-            var offsetY = positionOffsetsY[i] || 0;
-            positions.push({
-              x: center.x / width + offsetX,
-              y: 1 - center.y / height + offsetY
-            });
-          }
-          if (positions.length < 6 && soccerBallData.pentagons.length > 0) {
-            var pent = soccerBallData.pentagons[0];
-            var pentVertices = pent.map(function (idx) {
-              return vertices[idx];
-            });
-            var _center = pentVertices.reduce(function (acc, v) {
-              return {
-                x: acc.x + v.x,
-                y: acc.y + v.y
-              };
-            }, {
-              x: 0,
-              y: 0
-            });
-            _center.x /= pentVertices.length;
-            _center.y /= pentVertices.length;
-            var _offsetX = positionOffsetsX[positions.length] || 0;
-            var _offsetY = positionOffsetsY[positions.length] || 0;
-            positions.push({
-              x: _center.x / width + _offsetX,
-              y: 1 - _center.y / height + _offsetY
-            });
-          }
-          return positions;
-        }
-      }, {
         key: "extractHistogramData",
         value: function extractHistogramData(histItem, barColor) {
           var _fXaxis$fXmin, _fXaxis$fXmax;
-          var _this$settings3 = this.settings,
-            barBorderColor = _this$settings3.barBorderColor,
-            barBorderWidth = _this$settings3.barBorderWidth;
+          var _this$settings2 = this.settings,
+            barBorderColor = _this$settings2.barBorderColor,
+            barBorderWidth = _this$settings2.barBorderWidth;
           if (!histItem || !Array.isArray(histItem.fArray)) return null;
           var fXaxis = histItem.fXaxis || {};
           var nBins = fXaxis.fNbins || histItem.fArray.length - 2;
@@ -2465,21 +1809,19 @@ var PluginRegister = (function () {
         key: "buildSoccerBallSubplots",
         value: function buildSoccerBallSubplots(histogramsData) {
           var _this2 = this;
-          var _this$settings4 = this.settings,
-            barColors = _this$settings4.barColors,
-            subplotSize = _this$settings4.subplotSize,
-            showSubplotLabels = _this$settings4.showSubplotLabels,
-            useLogScale = _this$settings4.useLogScale;
+          var _this$settings3 = this.settings,
+            barColors = _this$settings3.barColors,
+            subplotSize = _this$settings3.subplotSize,
+            showSubplotLabels = _this$settings3.showSubplotLabels,
+            useLogScale = _this$settings3.useLogScale;
+            _this$settings3.positionOffsetsX;
+            _this$settings3.positionOffsetsY;
           var positions = this.getSoccerBallPositions();
           var plotlyTraces = [];
           var annotations = [];
           histogramsData.forEach(function (item, i) {
             if (!item || !item.histItem || i >= positions.length) return;
-
-            //const pos = positions[i];
-            var histItem = item.histItem;
-            var color = barColors[i % barColors.length];
-            var histData = _this2.extractHistogramData(histItem, color);
+            var histData = _this2.extractHistogramData(item.histItem, barColors[i % barColors.length]);
             if (!histData) return;
             plotlyTraces.push(_objectSpread2(_objectSpread2({}, histData), {}, {
               name: "".concat(item.detectorSystem, " ").concat(item.subdetector),
@@ -2550,6 +1892,80 @@ var PluginRegister = (function () {
             data: plotlyTraces,
             layout: layout
           };
+        }
+      }, {
+        key: "getSoccerBallPositions",
+        value: function getSoccerBallPositions() {
+          var _this$settings4 = this.settings,
+            positionOffsetsX = _this$settings4.positionOffsetsX,
+            positionOffsetsY = _this$settings4.positionOffsetsY;
+          var width = 100;
+          var height = 100;
+          var scale = 115;
+          var rotationDeg = 22.5;
+          var centroid = soccerBallData.vertices.reduce(function (acc, v) {
+            return [acc[0] + v[0], acc[1] + v[1]];
+          }, [0, 0]).map(function (c) {
+            return c / soccerBallData.vertices.length;
+          });
+          var rad = rotationDeg * Math.PI / 180;
+          var cosA = Math.cos(rad);
+          var sinA = Math.sin(rad);
+          var transformVertex = function transformVertex(v) {
+            var dx = v[0] - centroid[0];
+            var dy = v[1] - centroid[1];
+            var rx = dx * cosA - dy * sinA;
+            var ry = dx * sinA + dy * cosA;
+            return {
+              x: rx * scale + width / 2,
+              y: ry * scale + height / 2
+            };
+          };
+          var vertices = soccerBallData.vertices.map(transformVertex);
+          var positions = [];
+          for (var i = 0; i < Math.min(6, soccerBallData.hexagons.length); i++) {
+            var hex = soccerBallData.hexagons[i];
+            var hexVertices = hex.map(function (idx) {
+              return vertices[idx];
+            });
+            var center = hexVertices.reduce(function (acc, v) {
+              return {
+                x: acc.x + v.x,
+                y: acc.y + v.y
+              };
+            }, {
+              x: 0,
+              y: 0
+            });
+            center.x /= hexVertices.length;
+            center.y /= hexVertices.length;
+            positions.push({
+              x: center.x / width + positionOffsetsX[i] || 0,
+              y: 1 - center.y / height + positionOffsetsY[i] || 0
+            });
+          }
+          if (positions.length < 6 && soccerBallData.pentagons.length > 0) {
+            var pent = soccerBallData.pentagons[0];
+            var pentVertices = pent.map(function (idx) {
+              return vertices[idx];
+            });
+            var _center = pentVertices.reduce(function (acc, v) {
+              return {
+                x: acc.x + v.x,
+                y: acc.y + v.y
+              };
+            }, {
+              x: 0,
+              y: 0
+            });
+            _center.x /= pentVertices.length;
+            _center.y /= pentVertices.length;
+            positions.push({
+              x: _center.x / width + positionOffsetsX[positions.length] || 0,
+              y: 1 - _center.y / height + positionOffsetsY[positions.length] || 0
+            });
+          }
+          return positions;
         }
       }, {
         key: "renderSoccerBallSVG",
@@ -2625,9 +2041,7 @@ var PluginRegister = (function () {
           var _this$state = this.state,
             plotlyData = _this$state.plotlyData,
             plotlyLayout = _this$state.plotlyLayout,
-            revision = _this$state.revision,
-            loading = _this$state.loading,
-            error = _this$state.error;
+            revision = _this$state.revision;
           return /*#__PURE__*/React.createElement("div", {
             className: "no-drag",
             style: {
@@ -2635,11 +2049,7 @@ var PluginRegister = (function () {
               height: '100%',
               position: 'relative'
             }
-          }, loading && /*#__PURE__*/React.createElement("p", null, "Loading..."), error && /*#__PURE__*/React.createElement("p", {
-            style: {
-              color: 'red'
-            }
-          }, "Error: ", error), !loading && !error && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Plotly, {
+          }, /*#__PURE__*/React.createElement(Plotly, {
             data: plotlyData,
             layout: plotlyLayout,
             revision: revision,
@@ -2652,35 +2062,8 @@ var PluginRegister = (function () {
               responsive: true,
               displayModeBar: true
             }
-          }), this.renderSoccerBallSVG()));
+          }), this.renderSoccerBallSVG());
         }
-      }, {
-        key: "fetchJson",
-        value: function () {
-          var _fetchJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(url) {
-            var res;
-            return _regenerator().w(function (_context3) {
-              while (1) switch (_context3.n) {
-                case 0:
-                  _context3.n = 1;
-                  return fetch(url);
-                case 1:
-                  res = _context3.v;
-                  if (res.ok) {
-                    _context3.n = 2;
-                    break;
-                  }
-                  throw new Error("HTTP ".concat(res.status, " for URL ").concat(url));
-                case 2:
-                  return _context3.a(2, res.json());
-              }
-            }, _callee3);
-          }));
-          function fetchJson(_x) {
-            return _fetchJson.apply(this, arguments);
-          }
-          return fetchJson;
-        }()
       }], [{
         key: "settingSchema",
         get: function get() {
@@ -2689,101 +2072,84 @@ var PluginRegister = (function () {
               type: SettingTypes.NUMBER,
               "default": 2,
               label: 'Update Interval (s)',
-              onChange: 'onUpdateFrequencyChange',
-              advanced: false
+              onChange: 'onLayoutUpdate'
+            },
+            dataUrl: {
+              type: SettingTypes.STRING,
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+              label: 'Data URL',
+              advanced: true
             },
             detectorSystems: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.STRING,
               "default": ['LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO', 'LYSO'],
-              label: 'Detector Systems',
-              advanced: false
+              label: 'Detector Systems'
             },
             subdetectors: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.STRING,
               "default": ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
-              label: 'Subdetectors',
-              advanced: false
-            },
-            histogramDataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
-              label: 'Histogram Data URL',
-              advanced: true
+              label: 'Subdetectors'
             },
             barColors: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.COLOR,
               "default": ['rgba(70,130,180,1)', 'rgba(220,20,60,1)', 'rgba(34,139,34,1)', 'rgba(255,140,0,1)', 'rgba(148,0,211,1)', 'rgba(255,215,0,1)'],
-              label: 'Bar Colors',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              label: 'Bar Colors'
             },
             showSoccerBallOutline: {
               type: SettingTypes.BOOLEAN,
               "default": true,
-              label: 'Show Soccer Ball Outline',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              label: 'Show Soccer Ball Outline'
             },
             soccerBallLineColor: {
               type: SettingTypes.COLOR,
               "default": 'rgba(51,51,51,0.3)',
               label: 'Soccer Ball Line Color',
-              onChange: 'onLayoutUpdate',
               advanced: true
             },
             subplotSize: {
               type: SettingTypes.NUMBER,
               "default": 0.20,
-              label: 'Subplot Size (fraction)',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              label: 'Subplot Size (fraction)'
             },
             positionOffsetsX: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.NUMBER,
               "default": [0, 0, 0, 0, 0, 0],
-              label: 'X Position Offsets (fraction, bugged must refresh page)',
-              onChange: 'onLayoutUpdate',
+              label: 'X Position Offsets',
               advanced: true
             },
             positionOffsetsY: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.NUMBER,
               "default": [0, 0, 0, 0, 0, 0],
-              label: 'Y Position Offsets (fraction, bugged must refresh page)',
-              onChange: 'onLayoutUpdate',
+              label: 'Y Position Offsets',
               advanced: true
             },
             barBorderColor: {
               type: SettingTypes.COLOR,
               "default": 'rgba(0,0,0,1)',
               label: 'Bar Border Color',
-              onChange: 'onLayoutUpdate',
               advanced: true
             },
             barBorderWidth: {
               type: SettingTypes.NUMBER,
               "default": 0,
               label: 'Bar Border Width',
-              onChange: 'onLayoutUpdate',
               advanced: true
             },
             showSubplotLabels: {
               type: SettingTypes.BOOLEAN,
               "default": false,
-              label: 'Show Subplot Labels (bugged must refresh page)',
-              onChange: 'onLayoutUpdate',
+              label: 'Show Subplot Labels',
               advanced: true
             },
             useLogScale: {
               type: SettingTypes.BOOLEAN,
               "default": false,
-              label: 'Use Log Scale (Y-axis)',
-              onChange: 'onLayoutUpdate',
-              advanced: false
+              label: 'Use Log Scale (Y-axis)'
             }
           };
         }
@@ -2796,189 +2162,59 @@ var PluginRegister = (function () {
     var Figure = _ref.Figure,
       SettingTypes = _ref.SettingTypes;
     return _WFD5LysoArrayWaveforms = /*#__PURE__*/function (_Figure) {
-      function WFD5LysoArrayWaveforms(props) {
-        var _this;
+      function WFD5LysoArrayWaveforms() {
         _classCallCheck(this, WFD5LysoArrayWaveforms);
-        _this = _callSuper(this, WFD5LysoArrayWaveforms, [props]);
-        _this.state = {
-          tracesData: [],
-          plotlyData: [],
-          plotlyLayout: {},
-          revision: 0,
-          loading: true,
-          error: null
-        };
-        _this.latestTraceRaw = null;
-        _this.latestIntegralRaw = null;
-        return _this;
+        return _callSuper(this, WFD5LysoArrayWaveforms, arguments);
       }
       _inherits(WFD5LysoArrayWaveforms, _Figure);
       return _createClass(WFD5LysoArrayWaveforms, [{
-        key: "onInit",
-        value: function () {
-          var _onInit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-            var _yield$Promise$all, _yield$Promise$all2, traceRaw, integralRaw, _this$processTraceDat, data, layout, _t;
-            return _regenerator().w(function (_context) {
-              while (1) switch (_context.n) {
-                case 0:
-                  _context.p = 0;
-                  _context.n = 1;
-                  return Promise.all([this.fetchJson(this.settings.traceDataUrl), this.fetchJson(this.settings.integralDataUrl)]);
-                case 1:
-                  _yield$Promise$all = _context.v;
-                  _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
-                  traceRaw = _yield$Promise$all2[0];
-                  integralRaw = _yield$Promise$all2[1];
-                  this.latestTraceRaw = traceRaw;
-                  this.latestIntegralRaw = integralRaw;
-                  _this$processTraceDat = this.processTraceData(traceRaw, integralRaw), data = _this$processTraceDat.data, layout = _this$processTraceDat.layout;
-                  this.setState({
-                    plotlyData: data,
-                    plotlyLayout: layout,
-                    loading: false,
-                    error: null,
-                    revision: 0
-                  });
-                  _context.n = 3;
-                  break;
-                case 2:
-                  _context.p = 2;
-                  _t = _context.v;
-                  this.setState({
-                    error: _t.message,
-                    loading: false
-                  });
-                case 3:
-                  return _context.a(2);
-              }
-            }, _callee, this, [[0, 2]]);
-          }));
-          function onInit() {
-            return _onInit.apply(this, arguments);
-          }
-          return onInit;
-        }()
-      }, {
-        key: "onUpdateTick",
-        value: function () {
-          var _onUpdateTick = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-            var _yield$Promise$all3, _yield$Promise$all4, traceRaw, integralRaw, _this$processTraceDat2, data, shapes, annotations, _t2;
-            return _regenerator().w(function (_context2) {
-              while (1) switch (_context2.n) {
-                case 0:
-                  _context2.p = 0;
-                  _context2.n = 1;
-                  return Promise.all([this.fetchJson(this.settings.traceDataUrl), this.fetchJson(this.settings.integralDataUrl)]);
-                case 1:
-                  _yield$Promise$all3 = _context2.v;
-                  _yield$Promise$all4 = _slicedToArray(_yield$Promise$all3, 2);
-                  traceRaw = _yield$Promise$all4[0];
-                  integralRaw = _yield$Promise$all4[1];
-                  this.latestTraceRaw = traceRaw;
-                  this.latestIntegralRaw = integralRaw;
-                  _this$processTraceDat2 = this.processTraceData(traceRaw, integralRaw), data = _this$processTraceDat2.data, shapes = _this$processTraceDat2.shapes, annotations = _this$processTraceDat2.annotations;
-                  this.setState(function (prev) {
-                    return {
-                      plotlyData: data,
-                      plotlyLayout: _objectSpread2(_objectSpread2({}, prev.plotlyLayout), {}, {
-                        shapes: shapes,
-                        annotations: annotations
-                      }),
-                      error: null,
-                      revision: prev.revision + 1
-                    };
-                  });
-                  _context2.n = 3;
-                  break;
-                case 2:
-                  _context2.p = 2;
-                  _t2 = _context2.v;
-                  this.setState({
-                    error: _t2.message
-                  });
-                case 3:
-                  return _context2.a(2);
-              }
-            }, _callee2, this, [[0, 2]]);
-          }));
-          function onUpdateTick() {
-            return _onUpdateTick.apply(this, arguments);
-          }
-          return onUpdateTick;
-        }()
-      }, {
-        key: "onLayoutUpdate",
-        value: function onLayoutUpdate() {
-          if (this.latestTraceRaw && this.latestIntegralRaw) {
-            var _this$processTraceDat3 = this.processTraceData(this.latestTraceRaw, this.latestIntegralRaw),
-              data = _this$processTraceDat3.data,
-              layout = _this$processTraceDat3.layout,
-              shapes = _this$processTraceDat3.shapes,
-              annotations = _this$processTraceDat3.annotations;
-            this.setState(function (prev) {
-              return {
-                plotlyData: data,
-                plotlyLayout: {
-                  layout: layout,
-                  shapes: shapes,
-                  annotations: annotations
-                },
-                revision: prev.revision + 1
-              };
-            });
-          }
+        key: "onDataReceived",
+        value: function onDataReceived(waveformRaw) {
+          if (!waveformRaw) return;
+          var _this$formatPlotly = this.formatPlotly(waveformRaw),
+            data = _this$formatPlotly.data,
+            layout = _this$formatPlotly.layout;
+          this.setState(function (prev) {
+            return {
+              data: data,
+              layout: layout,
+              revision: (prev.revision || 0) + 1
+            };
+          });
         }
       }, {
-        key: "updateSetting",
-        value: function updateSetting(key, value) {
-          var _this$onUpdateFrequen;
-          var schema = this.constructor.settingSchema[key];
-          var processedValue = value;
-          if (schema) {
-            switch (schema.type) {
-              case SettingTypes.NUMBER:
-                processedValue = Number(value);
-                if (isNaN(processedValue)) processedValue = schema["default"];
-                break;
-              case SettingTypes.INT:
-                processedValue = parseInt(value);
-                if (isNaN(processedValue)) processedValue = schema["default"];
-                break;
-              case SettingTypes.BOOLEAN:
-                processedValue = typeof value === 'string' ? value.toLowerCase() === 'true' : Boolean(value);
-                break;
-              case SettingTypes.STRING:
-              case SettingTypes.COLOR:
-                processedValue = String(value);
-                break;
-            }
-          }
-          this.settings = _objectSpread2(_objectSpread2({}, this.settings), {}, _defineProperty({}, key, processedValue));
-          var onChange = schema === null || schema === void 0 ? void 0 : schema.onChange;
-          if (onChange === 'onUpdateTick') this.onUpdateTick();else if (onChange === 'onLayoutUpdate') this.onLayoutUpdate();else if (onChange === 'onUpdateFrequencyChange') (_this$onUpdateFrequen = this.onUpdateFrequencyChange) === null || _this$onUpdateFrequen === void 0 || _this$onUpdateFrequen.call(this, processedValue);
-          this.forceUpdate();
+        key: "onDataError",
+        value: function onDataError(error) {
+          this.setState({
+            error: error
+          });
         }
       }, {
-        key: "processTraceData",
-        value: function processTraceData(traceRaw, integralRaw) {
+        key: "formatPlotly",
+        value: function formatPlotly(waveformRaw) {
+          var _waveformRaw$data;
           var _this$settings = this.settings,
             detectorSystems = _this$settings.detectorSystems,
             subdetectors = _this$settings.subdetectors;
+          var list = waveformRaw === null || waveformRaw === void 0 || (_waveformRaw$data = waveformRaw.data) === null || _waveformRaw$data === void 0 ? void 0 : _waveformRaw$data.arr;
+          if (!Array.isArray(list)) {
+            return {
+              data: [],
+              layout: {
+                title: 'No waveform data',
+                autosize: true
+              }
+            };
+          }
+
+          // Find matching traces for each detector/subdetector pair
           var tracesData = detectorSystems.map(function (detectorSystem, i) {
-            var _traceRaw$data, _integralRaw$data;
             var subdetector = subdetectors[i];
-            var traceList = traceRaw === null || traceRaw === void 0 || (_traceRaw$data = traceRaw.data) === null || _traceRaw$data === void 0 ? void 0 : _traceRaw$data.arr;
-            var integralList = integralRaw === null || integralRaw === void 0 || (_integralRaw$data = integralRaw.data) === null || _integralRaw$data === void 0 ? void 0 : _integralRaw$data.arr;
-            if (!Array.isArray(traceList)) return null;
-            var traceItem = traceList.find(function (w) {
+            var wfItem = list.find(function (w) {
               return w.detectorSystem === detectorSystem && w.subdetector === subdetector;
             });
-            var integralItem = Array.isArray(integralList) ? integralList.find(function (w) {
-              return w.detectorSystem === detectorSystem && w.subdetector === subdetector;
-            }) : null;
-            return traceItem ? {
-              traceItem: traceItem,
-              integralItem: integralItem,
+            return wfItem && wfItem.trace ? {
+              wfItem: wfItem,
               detectorSystem: detectorSystem,
               subdetector: subdetector,
               index: i
@@ -2986,14 +2222,10 @@ var PluginRegister = (function () {
           });
           var _this$buildSoccerBall = this.buildSoccerBallSubplots(tracesData),
             data = _this$buildSoccerBall.data,
-            layout = _this$buildSoccerBall.layout,
-            shapes = _this$buildSoccerBall.shapes,
-            annotations = _this$buildSoccerBall.annotations;
+            layout = _this$buildSoccerBall.layout;
           return {
             data: data,
-            layout: layout,
-            shapes: shapes,
-            annotations: annotations
+            layout: layout
           };
         }
       }, {
@@ -3042,8 +2274,6 @@ var PluginRegister = (function () {
             });
             center.x /= hexVertices.length;
             center.y /= hexVertices.length;
-
-            // Apply position offsets
             var offsetX = positionOffsetsX[i] || 0;
             var offsetY = positionOffsetsY[i] || 0;
             positions.push({
@@ -3113,20 +2343,19 @@ var PluginRegister = (function () {
           var shapes = [];
           var annotations = [];
           tracesData.forEach(function (item, i) {
-            if (!item || !item.traceItem || !Array.isArray(item.traceItem.trace) || i >= positions.length) return;
-            var traceItem = item.traceItem,
-              integralItem = item.integralItem;
-            var trace = traceItem.trace;
+            if (!item || !item.wfItem || !Array.isArray(item.wfItem.trace) || i >= positions.length) return;
+            var wfItem = item.wfItem;
+            var trace = wfItem.trace;
             var color = traceColors[i % traceColors.length];
 
-            // Process trace data - subtract pedestal if enabled (global setting)
+            // Process trace data - subtract pedestal if enabled
             var processedTrace = _toConsumableArray(trace);
-            var adjustedPedestalLevel = integralItem === null || integralItem === void 0 ? void 0 : integralItem.pedestalLevel;
-            if (subtractPedestal && integralItem && typeof integralItem.pedestalLevel === 'number') {
+            var adjustedPedestalLevel = wfItem.pedestalLevel;
+            if (subtractPedestal && typeof wfItem.pedestalLevel === 'number') {
               processedTrace = trace.map(function (value) {
-                return value - integralItem.pedestalLevel;
+                return value - wfItem.pedestalLevel;
               });
-              adjustedPedestalLevel = 0; // Pedestal line should be at zero when subtracted
+              adjustedPedestalLevel = 0;
             }
 
             // Main trace
@@ -3147,7 +2376,7 @@ var PluginRegister = (function () {
               hoverinfo: 'x+y+name'
             });
 
-            // Subplot labels (added similar to integral array)
+            // Subplot labels
             if (showSubplotLabels) {
               annotations.push({
                 x: 0.5,
@@ -3164,128 +2393,125 @@ var PluginRegister = (function () {
               });
             }
 
-            // Integral/pedestal shapes and annotations
-            if (integralItem) {
-              // Integral bounds + fill
-              if (showIntegralBounds && integralItem.integration_window) {
-                var _integralItem$integra = integralItem.integration_window,
-                  startSample = _integralItem$integra.first,
-                  endSample = _integralItem$integra.second;
-                if (startSample != null && endSample != null) {
-                  var yMin = Math.min.apply(Math, _toConsumableArray(processedTrace));
-                  var yMax = Math.max.apply(Math, _toConsumableArray(processedTrace));
-                  if (showIntegralFill) {
-                    shapes.push({
-                      type: 'rect',
-                      xref: "x".concat(i + 1),
-                      yref: "y".concat(i + 1),
-                      x0: startSample,
-                      x1: endSample,
-                      y0: yMin,
-                      y1: yMax,
-                      fillcolor: integralFillColor,
-                      line: {
-                        width: 0
-                      }
-                    });
-                  }
-                  shapes.push({
-                    type: 'line',
-                    xref: "x".concat(i + 1),
-                    yref: "y".concat(i + 1),
-                    x0: startSample,
-                    x1: startSample,
-                    y0: yMin,
-                    y1: yMax,
-                    line: {
-                      color: integralLineColor,
-                      width: integralLineWidth,
-                      dash: integralLineDash
-                    }
-                  }, {
-                    type: 'line',
-                    xref: "x".concat(i + 1),
-                    yref: "y".concat(i + 1),
-                    x0: endSample,
-                    x1: endSample,
-                    y0: yMin,
-                    y1: yMax,
-                    line: {
-                      color: integralLineColor,
-                      width: integralLineWidth,
-                      dash: integralLineDash
-                    }
-                  });
-                  if (showIntegralWindowText) {
-                    annotations.push({
-                      x: (startSample + endSample) / 2,
-                      y: yMax,
-                      xref: "x".concat(i + 1),
-                      yref: "y".concat(i + 1),
-                      text: "[".concat(startSample, "-").concat(endSample, "]"),
-                      showarrow: false,
-                      font: {
-                        size: 8,
-                        color: 'black'
-                      }
-                    });
-                  }
-                }
-              }
-
-              // Pedestal line + stdev (use adjusted pedestal level)
-              if (showPedestal && typeof adjustedPedestalLevel === 'number') {
-                shapes.push({
-                  type: 'line',
-                  xref: "x".concat(i + 1),
-                  yref: "y".concat(i + 1),
-                  x0: 0,
-                  x1: trace.length - 1,
-                  y0: adjustedPedestalLevel,
-                  y1: adjustedPedestalLevel,
-                  line: {
-                    color: pedestalLineColor,
-                    width: pedestalLineWidth,
-                    dash: pedestalLineDash
-                  }
-                });
-                if (showPedestalStdev && typeof integralItem.pedestalStdev === 'number') {
+            // Integral bounds + fill
+            if (showIntegralBounds && wfItem.integration_window) {
+              var _wfItem$integration_w = wfItem.integration_window,
+                startSample = _wfItem$integration_w.first,
+                endSample = _wfItem$integration_w.second;
+              if (startSample != null && endSample != null) {
+                var yMin = Math.min.apply(Math, _toConsumableArray(processedTrace));
+                var yMax = Math.max.apply(Math, _toConsumableArray(processedTrace));
+                if (showIntegralFill) {
                   shapes.push({
                     type: 'rect',
                     xref: "x".concat(i + 1),
                     yref: "y".concat(i + 1),
-                    x0: 0,
-                    x1: trace.length - 1,
-                    y0: adjustedPedestalLevel - integralItem.pedestalStdev,
-                    y1: adjustedPedestalLevel + integralItem.pedestalStdev,
-                    fillcolor: pedestalStdevFillColor,
+                    x0: startSample,
+                    x1: endSample,
+                    y0: yMin,
+                    y1: yMax,
+                    fillcolor: integralFillColor,
                     line: {
                       width: 0
                     }
                   });
                 }
+                shapes.push({
+                  type: 'line',
+                  xref: "x".concat(i + 1),
+                  yref: "y".concat(i + 1),
+                  x0: startSample,
+                  x1: startSample,
+                  y0: yMin,
+                  y1: yMax,
+                  line: {
+                    color: integralLineColor,
+                    width: integralLineWidth,
+                    dash: integralLineDash
+                  }
+                }, {
+                  type: 'line',
+                  xref: "x".concat(i + 1),
+                  yref: "y".concat(i + 1),
+                  x0: endSample,
+                  x1: endSample,
+                  y0: yMin,
+                  y1: yMax,
+                  line: {
+                    color: integralLineColor,
+                    width: integralLineWidth,
+                    dash: integralLineDash
+                  }
+                });
+                if (showIntegralWindowText) {
+                  annotations.push({
+                    x: (startSample + endSample) / 2,
+                    y: yMax,
+                    xref: "x".concat(i + 1),
+                    yref: "y".concat(i + 1),
+                    text: "[".concat(startSample, "-").concat(endSample, "]"),
+                    showarrow: false,
+                    font: {
+                      size: 8,
+                      color: 'black'
+                    }
+                  });
+                }
               }
+            }
 
-              // Info box
-              if (showIntegralInfoBox) {
-                var _integralItem$integra2, _integralItem$amplitu;
-                annotations.push({
-                  x: integralInfoBoxX,
-                  y: integralInfoBoxY,
-                  xref: "x".concat(i + 1, " domain"),
-                  yref: "y".concat(i + 1, " domain"),
-                  text: "Int: ".concat(((_integralItem$integra2 = integralItem.integral) === null || _integralItem$integra2 === void 0 ? void 0 : _integralItem$integra2.toFixed(1)) || 'N/A', "<br>") + "Amp: ".concat(((_integralItem$amplitu = integralItem.amplitude) === null || _integralItem$amplitu === void 0 ? void 0 : _integralItem$amplitu.toFixed(1)) || 'N/A'),
-                  showarrow: false,
-                  font: {
-                    size: 8,
-                    color: 'black'
-                  },
-                  align: 'left',
-                  bgcolor: integralInfoBoxBgColor,
-                  bordercolor: integralInfoBoxBorderColor,
-                  borderwidth: 1
+            // Pedestal line + stdev
+            if (showPedestal && typeof adjustedPedestalLevel === 'number') {
+              shapes.push({
+                type: 'line',
+                xref: "x".concat(i + 1),
+                yref: "y".concat(i + 1),
+                x0: 0,
+                x1: trace.length - 1,
+                y0: adjustedPedestalLevel,
+                y1: adjustedPedestalLevel,
+                line: {
+                  color: pedestalLineColor,
+                  width: pedestalLineWidth,
+                  dash: pedestalLineDash
+                }
+              });
+              if (showPedestalStdev && typeof wfItem.pedestalStdev === 'number') {
+                shapes.push({
+                  type: 'rect',
+                  xref: "x".concat(i + 1),
+                  yref: "y".concat(i + 1),
+                  x0: 0,
+                  x1: trace.length - 1,
+                  y0: adjustedPedestalLevel - wfItem.pedestalStdev,
+                  y1: adjustedPedestalLevel + wfItem.pedestalStdev,
+                  fillcolor: pedestalStdevFillColor,
+                  line: {
+                    width: 0
+                  }
                 });
               }
+            }
+
+            // Info box
+            if (showIntegralInfoBox) {
+              var _wfItem$integral, _wfItem$amplitude;
+              annotations.push({
+                x: integralInfoBoxX,
+                y: integralInfoBoxY,
+                xref: "x".concat(i + 1, " domain"),
+                yref: "y".concat(i + 1, " domain"),
+                text: "Int: ".concat(((_wfItem$integral = wfItem.integral) === null || _wfItem$integral === void 0 ? void 0 : _wfItem$integral.toFixed(1)) || 'N/A', "<br>") + "Amp: ".concat(((_wfItem$amplitude = wfItem.amplitude) === null || _wfItem$amplitude === void 0 ? void 0 : _wfItem$amplitude.toFixed(1)) || 'N/A'),
+                showarrow: false,
+                font: {
+                  size: 8,
+                  color: 'black'
+                },
+                align: 'left',
+                bgcolor: integralInfoBoxBgColor,
+                bordercolor: integralInfoBoxBorderColor,
+                borderwidth: 1
+              });
             }
           });
 
@@ -3313,8 +2539,6 @@ var PluginRegister = (function () {
               var yDomain = [clampedY - subplotSize / 2, clampedY + subplotSize / 2];
               var xAxisKey = i === 0 ? 'xaxis' : "xaxis".concat(i + 1);
               var yAxisKey = i === 0 ? 'yaxis' : "yaxis".concat(i + 1);
-
-              // Configure X-axis based on global fixXAxis setting
               var xAxisConfig = {
                 domain: xDomain,
                 anchor: "y".concat(i + 1),
@@ -3330,8 +2554,6 @@ var PluginRegister = (function () {
               } else {
                 xAxisConfig.autorange = true;
               }
-
-              // Configure Y-axis based on global fixYAxis setting
               var yAxisConfig = {
                 domain: yDomain,
                 anchor: "x".concat(i + 1),
@@ -3353,9 +2575,7 @@ var PluginRegister = (function () {
           });
           return {
             data: plotlyTraces,
-            layout: layout,
-            shapes: shapes,
-            annotations: annotations
+            layout: layout
           };
         }
       }, {
@@ -3430,11 +2650,11 @@ var PluginRegister = (function () {
         key: "render",
         value: function render() {
           var _this$state = this.state,
-            plotlyData = _this$state.plotlyData,
-            plotlyLayout = _this$state.plotlyLayout,
-            revision = _this$state.revision,
             loading = _this$state.loading,
-            error = _this$state.error;
+            error = _this$state.error,
+            data = _this$state.data,
+            layout = _this$state.layout,
+            revision = _this$state.revision;
           return /*#__PURE__*/React.createElement("div", {
             className: "no-drag",
             style: {
@@ -3442,13 +2662,13 @@ var PluginRegister = (function () {
               height: '100%',
               position: 'relative'
             }
-          }, loading && /*#__PURE__*/React.createElement("p", null, "Loading..."), error && /*#__PURE__*/React.createElement("p", {
+          }, loading && /*#__PURE__*/React.createElement("div", null, "Loading..."), error && /*#__PURE__*/React.createElement("div", {
             style: {
               color: 'red'
             }
           }, "Error: ", error), !loading && !error && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Plotly, {
-            data: plotlyData,
-            layout: plotlyLayout,
+            data: data,
+            layout: layout,
             revision: revision,
             style: {
               width: '100%',
@@ -3461,43 +2681,16 @@ var PluginRegister = (function () {
             }
           }), this.renderSoccerBallSVG()));
         }
-      }, {
-        key: "fetchJson",
-        value: function () {
-          var _fetchJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(url) {
-            var res;
-            return _regenerator().w(function (_context3) {
-              while (1) switch (_context3.n) {
-                case 0:
-                  _context3.n = 1;
-                  return fetch(url);
-                case 1:
-                  res = _context3.v;
-                  if (res.ok) {
-                    _context3.n = 2;
-                    break;
-                  }
-                  throw new Error("HTTP ".concat(res.status, " for URL ").concat(url));
-                case 2:
-                  return _context3.a(2, res.json());
-              }
-            }, _callee3);
-          }));
-          function fetchJson(_x) {
-            return _fetchJson.apply(this, arguments);
-          }
-          return fetchJson;
-        }()
       }], [{
         key: "settingSchema",
         get: function get() {
-          return {
-            updateFrequency: {
-              type: SettingTypes.NUMBER,
-              "default": 2,
-              label: 'Update Interval (s)',
-              onChange: 'onUpdateFrequencyChange',
-              advanced: false
+          return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5LysoArrayWaveforms, "settingSchema", this)), {}, {
+            dataUrl: {
+              type: SettingTypes.STRING,
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              label: 'Data URL',
+              onChange: 'onUpdateTick',
+              advanced: true
             },
             detectorSystems: {
               type: SettingTypes.ARRAY,
@@ -3512,18 +2705,6 @@ var PluginRegister = (function () {
               "default": ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
               label: 'Subdetectors',
               advanced: false
-            },
-            traceDataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
-              label: 'Trace Data URL',
-              advanced: true
-            },
-            integralDataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
-              label: 'Integral Data URL',
-              advanced: true
             },
             traceColors: {
               type: SettingTypes.ARRAY,
@@ -3554,12 +2735,11 @@ var PluginRegister = (function () {
               onChange: 'onLayoutUpdate',
               advanced: false
             },
-            // Position control arrays (added from integral array class)
             positionOffsetsX: {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.NUMBER,
               "default": [0, 0, 0, 0, 0, 0],
-              label: 'X Position Offsets (fraction, bugged must refresh page)',
+              label: 'X Position Offsets (fraction)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
@@ -3567,11 +2747,10 @@ var PluginRegister = (function () {
               type: SettingTypes.ARRAY,
               elementType: SettingTypes.NUMBER,
               "default": [0, 0, 0, 0, 0, 0],
-              label: 'Y Position Offsets (fraction, bugged must refresh page)',
+              label: 'Y Position Offsets (fraction)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // Subplot labels setting (added from integral array class)
             showSubplotLabels: {
               type: SettingTypes.BOOLEAN,
               "default": false,
@@ -3579,7 +2758,6 @@ var PluginRegister = (function () {
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // Global Y axis settings for all subplots
             subtractPedestal: {
               type: SettingTypes.BOOLEAN,
               "default": false,
@@ -3590,49 +2768,45 @@ var PluginRegister = (function () {
             fixYAxis: {
               type: SettingTypes.BOOLEAN,
               "default": false,
-              label: 'Fix Y Axis Range (Global, bugged requires refresh)',
+              label: 'Fix Y Axis Range (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
             yAxisMin: {
               type: SettingTypes.NUMBER,
               "default": -2048,
-              // -2^11
-              label: 'Y Axis Min (Global, bugged requires refresh)',
+              label: 'Y Axis Min (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
             yAxisMax: {
               type: SettingTypes.NUMBER,
               "default": 2048,
-              // 2^11
-              label: 'Y Axis Max (Global, bugged requires refresh)',
+              label: 'Y Axis Max (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // Global X axis settings for all subplots
             fixXAxis: {
               type: SettingTypes.BOOLEAN,
               "default": false,
-              label: 'Fix X Axis Range (Global, bugged requires refresh)',
+              label: 'Fix X Axis Range (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
             xAxisMin: {
               type: SettingTypes.NUMBER,
               "default": 0,
-              label: 'X Axis Min (Global, bugged requires refresh)',
+              label: 'X Axis Min (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
             xAxisMax: {
               type: SettingTypes.NUMBER,
               "default": 2048,
-              label: 'X Axis Max (Global, bugged requires refresh)',
+              label: 'X Axis Max (Global)',
               onChange: 'onLayoutUpdate',
               advanced: true
             },
-            // Integral visualization settings
             showIntegralBounds: {
               type: SettingTypes.BOOLEAN,
               "default": true,
@@ -3672,7 +2846,6 @@ var PluginRegister = (function () {
               label: 'Show Integral Info Box',
               onChange: 'onLayoutUpdate'
             },
-            // Advanced styling
             pedestalLineColor: {
               type: SettingTypes.COLOR,
               "default": 'black',
@@ -3757,7 +2930,7 @@ var PluginRegister = (function () {
               onChange: 'onLayoutUpdate',
               advanced: true
             }
-          };
+          });
         }
       }]);
     }(Figure), _defineProperty(_WFD5LysoArrayWaveforms, "displayName", 'WFD5 Lyso Array Waveforms'), _defineProperty(_WFD5LysoArrayWaveforms, "name", 'WFD5LysoArrayWaveforms'), _WFD5LysoArrayWaveforms;
@@ -3883,6 +3056,14 @@ var PluginRegister = (function () {
         key: "settingSchema",
         get: function get() {
           return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5WaveformTrace, "settingSchema", this)), {}, {
+            // Data URL
+            dataUrl: {
+              type: SettingTypes.STRING,
+              "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+              label: 'Data URL',
+              onChange: 'onUpdateTick',
+              advanced: true
+            },
             // Detector selection
             detectorSystem: {
               type: SettingTypes.STRING,
@@ -3914,14 +3095,6 @@ var PluginRegister = (function () {
               "default": 0,
               label: 'Channel #',
               onChange: 'onUpdateTick'
-            },
-            // Data URL
-            dataUrl: {
-              type: SettingTypes.STRING,
-              "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
-              label: 'Data URL',
-              onChange: 'onUpdateTick',
-              advanced: true
             },
             // Basic trace style
             traceColor: {

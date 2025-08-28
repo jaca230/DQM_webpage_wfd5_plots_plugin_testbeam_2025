@@ -6,12 +6,13 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
 
     static get settingSchema() {
         return {
-        updateFrequency: {
-            type: SettingTypes.NUMBER,
-            default: 2,
-            label: 'Update Interval (s)',
-            onChange: 'onUpdateFrequencyChange',
-            advanced: false,
+        ...super.settingSchema,
+        dataUrl: {
+            type: SettingTypes.STRING,
+            default: 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            label: 'Data URL',
+            onChange: 'onUpdateTick',
+            advanced: true,
         },
         detectorSystems: {
             type: SettingTypes.ARRAY,
@@ -26,18 +27,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             default: ['HEX2', 'HEX3', 'HEX4', 'HEX5', 'HEX1', 'PENT'],
             label: 'Subdetectors',
             advanced: false,
-        },
-        traceDataUrl: {
-            type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
-            label: 'Trace Data URL',
-            advanced: true,
-        },
-        integralDataUrl: {
-            type: SettingTypes.STRING,
-            default: 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralCollection',
-            label: 'Integral Data URL',
-            advanced: true,
         },
         traceColors: {
             type: SettingTypes.ARRAY,
@@ -75,13 +64,11 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             onChange: 'onLayoutUpdate',
             advanced: false,
         },
-
-        // Position control arrays (added from integral array class)
         positionOffsetsX: {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.NUMBER,
             default: [0, 0, 0, 0, 0, 0],
-            label: 'X Position Offsets (fraction, bugged must refresh page)',
+            label: 'X Position Offsets (fraction)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
@@ -89,12 +76,10 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             type: SettingTypes.ARRAY,
             elementType: SettingTypes.NUMBER,
             default: [0, 0, 0, 0, 0, 0],
-            label: 'Y Position Offsets (fraction, bugged must refresh page)',
+            label: 'Y Position Offsets (fraction)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
-
-        // Subplot labels setting (added from integral array class)
         showSubplotLabels: {
             type: SettingTypes.BOOLEAN,
             default: false,
@@ -102,8 +87,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
-
-        // Global Y axis settings for all subplots
         subtractPedestal: {
             type: SettingTypes.BOOLEAN,
             default: false,
@@ -114,49 +97,45 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         fixYAxis: {
             type: SettingTypes.BOOLEAN,
             default: false,
-            label: 'Fix Y Axis Range (Global, bugged requires refresh)',
+            label: 'Fix Y Axis Range (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
         yAxisMin: {
             type: SettingTypes.NUMBER,
-            default: -2048, // -2^11
-            label: 'Y Axis Min (Global, bugged requires refresh)',
+            default: -2048,
+            label: 'Y Axis Min (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
         yAxisMax: {
             type: SettingTypes.NUMBER,
-            default: 2048, // 2^11
-            label: 'Y Axis Max (Global, bugged requires refresh)',
+            default: 2048,
+            label: 'Y Axis Max (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
-
-        // Global X axis settings for all subplots
         fixXAxis: {
             type: SettingTypes.BOOLEAN,
             default: false,
-            label: 'Fix X Axis Range (Global, bugged requires refresh)',
+            label: 'Fix X Axis Range (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
         xAxisMin: {
             type: SettingTypes.NUMBER,
             default: 0,
-            label: 'X Axis Min (Global, bugged requires refresh)',
+            label: 'X Axis Min (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
         xAxisMax: {
             type: SettingTypes.NUMBER,
             default: 2048,
-            label: 'X Axis Max (Global, bugged requires refresh)',
+            label: 'X Axis Max (Global)',
             onChange: 'onLayoutUpdate',
             advanced: true,
         },
-
-        // Integral visualization settings
         showIntegralBounds: {
             type: SettingTypes.BOOLEAN,
             default: true,
@@ -196,8 +175,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             label: 'Show Integral Info Box',
             onChange: 'onLayoutUpdate',
         },
-
-        // Advanced styling
         pedestalLineColor: {
             type: SettingTypes.COLOR,
             default: 'black',
@@ -285,135 +262,38 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         };
     }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-        tracesData: [],
-        plotlyData: [],
-        plotlyLayout: {},
-        revision: 0,
-        loading: true,
-        error: null,
-        };
-        this.latestTraceRaw = null;
-        this.latestIntegralRaw = null;
+    onDataReceived(waveformRaw) {
+        if (!waveformRaw) return;
+        const { data, layout } = this.formatPlotly(waveformRaw);
+        this.setState(prev => ({ data, layout, revision: (prev.revision || 0) + 1 }));
     }
 
-    async onInit() {
-        try {
-        const [traceRaw, integralRaw] = await Promise.all([
-            this.fetchJson(this.settings.traceDataUrl),
-            this.fetchJson(this.settings.integralDataUrl),
-        ]);
-
-        this.latestTraceRaw = traceRaw;
-        this.latestIntegralRaw = integralRaw;
-
-        const { data, layout } = this.processTraceData(traceRaw, integralRaw);
-        this.setState({
-            plotlyData: data,
-            plotlyLayout: layout,
-            loading: false,
-            error: null,
-            revision: 0,
-        });
-        } catch (err) {
-        this.setState({ error: err.message, loading: false });
-        }
+    onDataError(error) {
+        this.setState({ error });
     }
 
-    async onUpdateTick() {
-        try {
-        const [traceRaw, integralRaw] = await Promise.all([
-            this.fetchJson(this.settings.traceDataUrl),
-            this.fetchJson(this.settings.integralDataUrl),
-        ]);
-
-        this.latestTraceRaw = traceRaw;
-        this.latestIntegralRaw = integralRaw;
-
-        const { data, shapes, annotations } = this.processTraceData(traceRaw, integralRaw);
-        this.setState((prev) => ({
-            plotlyData: data,
-            plotlyLayout: { ...prev.plotlyLayout, shapes, annotations },
-            error: null,
-            revision: prev.revision + 1,
-        }));
-        } catch (err) {
-        this.setState({ error: err.message });
-        }
-    }
-
-    onLayoutUpdate() {
-        if (this.latestTraceRaw && this.latestIntegralRaw) {
-        const { data, layout, shapes, annotations } = this.processTraceData(this.latestTraceRaw, this.latestIntegralRaw);
-        this.setState((prev) => ({
-            plotlyData: data,
-            plotlyLayout: { layout, shapes, annotations },
-            revision: prev.revision + 1,
-        }));
-        }
-    }
-
-    updateSetting(key, value) {
-        const schema = this.constructor.settingSchema[key];
-        let processedValue = value;
-
-        if (schema) {
-        switch (schema.type) {
-            case SettingTypes.NUMBER:
-            processedValue = Number(value);
-            if (isNaN(processedValue)) processedValue = schema.default;
-            break;
-            case SettingTypes.INT:
-            processedValue = parseInt(value);
-            if (isNaN(processedValue)) processedValue = schema.default;
-            break;
-            case SettingTypes.BOOLEAN:
-            processedValue = typeof value === 'string' ? value.toLowerCase() === 'true' : Boolean(value);
-            break;
-            case SettingTypes.STRING:
-            case SettingTypes.COLOR:
-            processedValue = String(value);
-            break;
-            default:
-            break;
-        }
-        }
-
-        this.settings = { ...this.settings, [key]: processedValue };
-        const onChange = schema?.onChange;
-        if (onChange === 'onUpdateTick') this.onUpdateTick();
-        else if (onChange === 'onLayoutUpdate') this.onLayoutUpdate();
-        else if (onChange === 'onUpdateFrequencyChange') this.onUpdateFrequencyChange?.(processedValue);
-        this.forceUpdate();
-    }
-
-    processTraceData(traceRaw, integralRaw) {
+    formatPlotly(waveformRaw) {
         const { detectorSystems, subdetectors } = this.settings;
+        const list = waveformRaw?.data?.arr;
 
+        if (!Array.isArray(list)) {
+        return { data: [], layout: { title: 'No waveform data', autosize: true } };
+        }
+
+        // Find matching traces for each detector/subdetector pair
         const tracesData = detectorSystems.map((detectorSystem, i) => {
         const subdetector = subdetectors[i];
-        const traceList = traceRaw?.data?.arr;
-        const integralList = integralRaw?.data?.arr;
-
-        if (!Array.isArray(traceList)) return null;
-
-        const traceItem = traceList.find(
+        const wfItem = list.find(
             (w) => w.detectorSystem === detectorSystem && w.subdetector === subdetector
         );
 
-        const integralItem = Array.isArray(integralList)
-            ? integralList.find((w) => w.detectorSystem === detectorSystem && w.subdetector === subdetector)
-            : null;
-
-        return traceItem
-            ? { traceItem, integralItem, detectorSystem, subdetector, index: i }
+        return wfItem && wfItem.trace
+            ? { wfItem, detectorSystem, subdetector, index: i }
             : null;
         });
 
-        const { data, layout, shapes, annotations } = this.buildSoccerBallSubplots(tracesData);
-        return { data, layout, shapes, annotations };
+        const { data, layout } = this.buildSoccerBallSubplots(tracesData);
+        return { data, layout };
     }
 
     getSoccerBallPositions() {
@@ -450,7 +330,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         center.x /= hexVertices.length;
         center.y /= hexVertices.length;
 
-        // Apply position offsets
         const offsetX = positionOffsetsX[i] || 0;
         const offsetY = positionOffsetsY[i] || 0;
 
@@ -479,7 +358,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         return positions;
     }
 
-
     buildSoccerBallSubplots(tracesData) {
         const {
         traceColors, subplotSize, showIntegralBounds, showIntegralFill,
@@ -497,19 +375,19 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         const annotations = [];
 
         tracesData.forEach((item, i) => {
-        if (!item || !item.traceItem || !Array.isArray(item.traceItem.trace) || i >= positions.length) return;
+        if (!item || !item.wfItem || !Array.isArray(item.wfItem.trace) || i >= positions.length) return;
 
-        const { traceItem, integralItem } = item;
-        const trace = traceItem.trace;
+        const { wfItem } = item;
+        const trace = wfItem.trace;
         const color = traceColors[i % traceColors.length];
 
-        // Process trace data - subtract pedestal if enabled (global setting)
+        // Process trace data - subtract pedestal if enabled
         let processedTrace = [...trace];
-        let adjustedPedestalLevel = integralItem?.pedestalLevel;
+        let adjustedPedestalLevel = wfItem.pedestalLevel;
         
-        if (subtractPedestal && integralItem && typeof integralItem.pedestalLevel === 'number') {
-            processedTrace = trace.map(value => value - integralItem.pedestalLevel);
-            adjustedPedestalLevel = 0; // Pedestal line should be at zero when subtracted
+        if (subtractPedestal && typeof wfItem.pedestalLevel === 'number') {
+            processedTrace = trace.map(value => value - wfItem.pedestalLevel);
+            adjustedPedestalLevel = 0;
         }
 
         // Main trace
@@ -526,7 +404,7 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             hoverinfo: 'x+y+name',
         });
 
-        // Subplot labels (added similar to integral array)
+        // Subplot labels
         if (showSubplotLabels) {
             annotations.push({
             x: 0.5,
@@ -540,90 +418,87 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             });
         }
 
-        // Integral/pedestal shapes and annotations
-        if (integralItem) {
-            // Integral bounds + fill
-            if (showIntegralBounds && integralItem.integration_window) {
-            const { first: startSample, second: endSample } = integralItem.integration_window;
+        // Integral bounds + fill
+        if (showIntegralBounds && wfItem.integration_window) {
+            const { first: startSample, second: endSample } = wfItem.integration_window;
             if (startSample != null && endSample != null) {
-                const yMin = Math.min(...processedTrace);
-                const yMax = Math.max(...processedTrace);
+            const yMin = Math.min(...processedTrace);
+            const yMax = Math.max(...processedTrace);
 
-                if (showIntegralFill) {
+            if (showIntegralFill) {
                 shapes.push({
-                    type: 'rect',
-                    xref: `x${i + 1}`,
-                    yref: `y${i + 1}`,
-                    x0: startSample,
-                    x1: endSample,
-                    y0: yMin,
-                    y1: yMax,
-                    fillcolor: integralFillColor,
-                    line: { width: 0 },
-                });
-                }
-                shapes.push(
-                { type: 'line', xref: `x${i + 1}`, yref: `y${i + 1}`, x0: startSample, x1: startSample, y0: yMin, y1: yMax, line: { color: integralLineColor, width: integralLineWidth, dash: integralLineDash }},
-                { type: 'line', xref: `x${i + 1}`, yref: `y${i + 1}`, x0: endSample, x1: endSample, y0: yMin, y1: yMax, line: { color: integralLineColor, width: integralLineWidth, dash: integralLineDash }}
-                );
-                if (showIntegralWindowText) {
-                annotations.push({
-                    x: (startSample + endSample) / 2,
-                    y: yMax,
-                    xref: `x${i + 1}`,
-                    yref: `y${i + 1}`,
-                    text: `[${startSample}-${endSample}]`,
-                    showarrow: false,
-                    font: { size: 8, color: 'black' },
-                });
-                }
-            }
-            }
-
-            // Pedestal line + stdev (use adjusted pedestal level)
-            if (showPedestal && typeof adjustedPedestalLevel === 'number') {
-            shapes.push({
-                type: 'line',
+                type: 'rect',
                 xref: `x${i + 1}`,
                 yref: `y${i + 1}`,
-                x0: 0,
-                x1: trace.length - 1,
-                y0: adjustedPedestalLevel,
-                y1: adjustedPedestalLevel,
-                line: { color: pedestalLineColor, width: pedestalLineWidth, dash: pedestalLineDash },
+                x0: startSample,
+                x1: endSample,
+                y0: yMin,
+                y1: yMax,
+                fillcolor: integralFillColor,
+                line: { width: 0 },
+                });
+            }
+            shapes.push(
+                { type: 'line', xref: `x${i + 1}`, yref: `y${i + 1}`, x0: startSample, x1: startSample, y0: yMin, y1: yMax, line: { color: integralLineColor, width: integralLineWidth, dash: integralLineDash }},
+                { type: 'line', xref: `x${i + 1}`, yref: `y${i + 1}`, x0: endSample, x1: endSample, y0: yMin, y1: yMax, line: { color: integralLineColor, width: integralLineWidth, dash: integralLineDash }}
+            );
+            if (showIntegralWindowText) {
+                annotations.push({
+                x: (startSample + endSample) / 2,
+                y: yMax,
+                xref: `x${i + 1}`,
+                yref: `y${i + 1}`,
+                text: `[${startSample}-${endSample}]`,
+                showarrow: false,
+                font: { size: 8, color: 'black' },
+                });
+            }
+            }
+        }
+
+        // Pedestal line + stdev
+        if (showPedestal && typeof adjustedPedestalLevel === 'number') {
+            shapes.push({
+            type: 'line',
+            xref: `x${i + 1}`,
+            yref: `y${i + 1}`,
+            x0: 0,
+            x1: trace.length - 1,
+            y0: adjustedPedestalLevel,
+            y1: adjustedPedestalLevel,
+            line: { color: pedestalLineColor, width: pedestalLineWidth, dash: pedestalLineDash },
             });
-            if (showPedestalStdev && typeof integralItem.pedestalStdev === 'number') {
-                shapes.push({
+            if (showPedestalStdev && typeof wfItem.pedestalStdev === 'number') {
+            shapes.push({
                 type: 'rect',
                 xref: `x${i + 1}`,
                 yref: `y${i + 1}`,
                 x0: 0,
                 x1: trace.length - 1,
-                y0: adjustedPedestalLevel - integralItem.pedestalStdev,
-                y1: adjustedPedestalLevel + integralItem.pedestalStdev,
+                y0: adjustedPedestalLevel - wfItem.pedestalStdev,
+                y1: adjustedPedestalLevel + wfItem.pedestalStdev,
                 fillcolor: pedestalStdevFillColor,
                 line: { width: 0 },
-                });
-            }
-            }
-
-            // Info box
-            if (showIntegralInfoBox) {
-            annotations.push({
-                x: integralInfoBoxX,
-                y: integralInfoBoxY,
-                xref: `x${i + 1} domain`,
-                yref: `y${i + 1} domain`,
-                text: `Int: ${integralItem.integral?.toFixed(1) || 'N/A'}<br>` +
-                    `Amp: ${integralItem.amplitude?.toFixed(1) || 'N/A'}`,
-                showarrow: false,
-                font: { size: 8, color: 'black' },
-                align: 'left',
-                bgcolor: integralInfoBoxBgColor,
-                bordercolor: integralInfoBoxBorderColor,
-                borderwidth: 1,
             });
             }
+        }
+
+        // Info box
+        if (showIntegralInfoBox) {
+            annotations.push({
+            x: integralInfoBoxX,
+            y: integralInfoBoxY,
+            xref: `x${i + 1} domain`,
+            yref: `y${i + 1} domain`,
+            text: `Int: ${wfItem.integral?.toFixed(1) || 'N/A'}<br>` +
+                    `Amp: ${wfItem.amplitude?.toFixed(1) || 'N/A'}`,
+            showarrow: false,
+            font: { size: 8, color: 'black' },
+            align: 'left',
+            bgcolor: integralInfoBoxBgColor,
+            bordercolor: integralInfoBoxBorderColor,
+            borderwidth: 1,
+            });
         }
         });
 
@@ -650,40 +525,38 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             const xAxisKey = i === 0 ? 'xaxis' : `xaxis${i + 1}`;
             const yAxisKey = i === 0 ? 'yaxis' : `yaxis${i + 1}`;
 
-            // Configure X-axis based on global fixXAxis setting
             const xAxisConfig = {
-                domain: xDomain, 
-                anchor: `y${i + 1}`, 
-                showgrid: true, 
-                gridcolor: 'rgba(128,128,128,0.2)', 
-                showticklabels: true, 
-                zeroline: true, 
-                title: ''
+            domain: xDomain, 
+            anchor: `y${i + 1}`, 
+            showgrid: true, 
+            gridcolor: 'rgba(128,128,128,0.2)', 
+            showticklabels: true, 
+            zeroline: true, 
+            title: ''
             };
 
             if (fixXAxis) {
-                xAxisConfig.range = [xAxisMin, xAxisMax];
-                xAxisConfig.autorange = false;
+            xAxisConfig.range = [xAxisMin, xAxisMax];
+            xAxisConfig.autorange = false;
             } else {
-                xAxisConfig.autorange = true;
+            xAxisConfig.autorange = true;
             }
 
-            // Configure Y-axis based on global fixYAxis setting
             const yAxisConfig = {
-                domain: yDomain, 
-                anchor: `x${i + 1}`, 
-                showgrid: true, 
-                gridcolor: 'rgba(128,128,128,0.2)', 
-                showticklabels: true, 
-                zeroline: true, 
-                title: ''
+            domain: yDomain, 
+            anchor: `x${i + 1}`, 
+            showgrid: true, 
+            gridcolor: 'rgba(128,128,128,0.2)', 
+            showticklabels: true, 
+            zeroline: true, 
+            title: ''
             };
 
             if (fixYAxis) {
-                yAxisConfig.range = [yAxisMin, yAxisMax];
-                yAxisConfig.autorange = false;
+            yAxisConfig.range = [yAxisMin, yAxisMax];
+            yAxisConfig.autorange = false;
             } else {
-                yAxisConfig.autorange = true;
+            yAxisConfig.autorange = true;
             }
 
             layout[xAxisKey] = xAxisConfig;
@@ -691,7 +564,7 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
         }
         });
 
-        return { data: plotlyTraces, layout, shapes, annotations };
+        return { data: plotlyTraces, layout };
     }
 
     renderSoccerBallSVG() {
@@ -751,16 +624,17 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
     }
 
     render() {
-        const { plotlyData, plotlyLayout, revision, loading, error } = this.state;
+        const { loading, error, data, layout, revision } = this.state;
+
         return (
         <div className="no-drag" style={{ width: '100%', height: '100%', position: 'relative' }}>
-            {loading && <p>Loading...</p>}
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+            {loading && <div>Loading...</div>}
+            {error && <div style={{ color: 'red' }}>Error: {error}</div>}
             {!loading && !error && (
             <>
                 <Plotly
-                data={plotlyData}
-                layout={plotlyLayout}
+                data={data}
+                layout={layout}
                 revision={revision}
                 style={{ width: '100%', height: '100%' }}
                 useResizeHandler
@@ -771,12 +645,6 @@ export default function makeWFD5LysoArrayWaveforms({ Figure, SettingTypes }) {
             )}
         </div>
         );
-    }
-
-    async fetchJson(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status} for URL ${url}`);
-        return res.json();
     }
     }
 }

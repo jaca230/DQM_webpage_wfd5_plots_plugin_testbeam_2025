@@ -6,6 +6,15 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
     static get settingSchema() {
       return {
         ...super.settingSchema,
+        // Data URL
+        dataUrl: {
+          type: SettingTypes.STRING,
+          default:
+            'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+          label: 'Data URL',
+          onChange: 'onUpdateTick',
+          advanced: true,
+        },
         // Detector selection
         detectorSystem: {
           type: SettingTypes.STRING,
@@ -38,16 +47,6 @@ export default function makeWFD5WaveformTraceOnly({ Plot, SettingTypes }) {
           default: 0,
           label: 'Channel #',
           onChange: 'onUpdateTick',
-        },
-
-        // Data URL
-        dataUrl: {
-          type: SettingTypes.STRING,
-          default:
-            'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
-          label: 'Data URL',
-          onChange: 'onUpdateTick',
-          advanced: true,
         },
 
         // Basic trace style
