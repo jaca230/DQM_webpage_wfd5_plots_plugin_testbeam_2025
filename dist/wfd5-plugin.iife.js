@@ -913,7 +913,9 @@ var PluginRegister = (function () {
       }, {
         key: "formatPlotly",
         value: function formatPlotly(waveformRaw) {
-          var _waveformRaw$data;
+          var _waveformRaw$data,
+            _this = this,
+            _wfItem;
           var s = this.settings;
           var list = waveformRaw === null || waveformRaw === void 0 || (_waveformRaw$data = waveformRaw.data) === null || _waveformRaw$data === void 0 ? void 0 : _waveformRaw$data.arr;
           if (!(list !== null && list !== void 0 && list.length)) return {
@@ -923,10 +925,54 @@ var PluginRegister = (function () {
               autosize: true
             }
           };
-          var wfItem = list.find(function (item) {
-            return s.detectorSystem && s.subdetector && item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector || item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel;
-          });
-          if (!(wfItem !== null && wfItem !== void 0 && wfItem.trace)) return {
+          var wfItem = null;
+          var settingsToUpdate = {};
+
+          // Try detector/subdetector first
+          if (s.detectorSystem && s.subdetector) {
+            wfItem = list.find(function (item) {
+              return item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector && item.trace;
+            });
+            if (wfItem) {
+              // Update crate/amc/channel from matched item
+              if (wfItem.crateNum != null && s.crate !== wfItem.crateNum) {
+                settingsToUpdate.crate = wfItem.crateNum;
+              }
+              if (wfItem.amcNum != null && s.amcSlot !== wfItem.amcNum) {
+                settingsToUpdate.amcSlot = wfItem.amcNum;
+              }
+              if (wfItem.channelTag != null && s.channel !== wfItem.channelTag) {
+                settingsToUpdate.channel = wfItem.channelTag;
+              }
+            }
+          }
+
+          // Fallback to crate/amc/channel
+          if (!wfItem) {
+            wfItem = list.find(function (item) {
+              return item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel && item.trace;
+            });
+            if (wfItem) {
+              // Update detector/subdetector from matched item
+              if (wfItem.detectorSystem && s.detectorSystem !== wfItem.detectorSystem) {
+                settingsToUpdate.detectorSystem = wfItem.detectorSystem;
+              }
+              if (wfItem.subdetector && s.subdetector !== wfItem.subdetector) {
+                settingsToUpdate.subdetector = wfItem.subdetector;
+              }
+            }
+          }
+
+          // Only update settings if there are actual changes
+          if (Object.keys(settingsToUpdate).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
+            var newSettings = _objectSpread2(_objectSpread2({}, s), settingsToUpdate);
+            console.log("[".concat(this.id || 'WFD5Waveform', "] Auto-syncing settings:"), settingsToUpdate);
+            // Use setTimeout to avoid updating during render
+            setTimeout(function () {
+              return _this.props.onSettingsCorrected(newSettings);
+            }, 0);
+          }
+          if (!((_wfItem = wfItem) !== null && _wfItem !== void 0 && _wfItem.trace)) return {
             data: [],
             layout: {
               title: 'No matching trace',

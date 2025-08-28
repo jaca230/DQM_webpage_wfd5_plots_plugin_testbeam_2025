@@ -70,11 +70,61 @@ export default function makeWFD5Waveform({ Figure, SettingTypes }) {
       const list = waveformRaw?.data?.arr;
       if (!list?.length) return { data: [], layout: { title: 'No waveform data', autosize: true } };
 
-      const wfItem = list.find(
-        item =>
-          (s.detectorSystem && s.subdetector && item.detectorSystem === s.detectorSystem && item.subdetector === s.subdetector) ||
-          (item.crateNum === s.crate && item.amcNum === s.amcSlot && item.channelTag === s.channel)
-      );
+      let wfItem = null;
+      let settingsToUpdate = {};
+
+      // Try detector/subdetector first
+      if (s.detectorSystem && s.subdetector) {
+        wfItem = list.find(
+          item =>
+            item.detectorSystem === s.detectorSystem &&
+            item.subdetector === s.subdetector &&
+            item.trace
+        );
+
+        if (wfItem) {
+          // Update crate/amc/channel from matched item
+          if (wfItem.crateNum != null && s.crate !== wfItem.crateNum) {
+            settingsToUpdate.crate = wfItem.crateNum;
+          }
+          if (wfItem.amcNum != null && s.amcSlot !== wfItem.amcNum) {
+            settingsToUpdate.amcSlot = wfItem.amcNum;
+          }
+          if (wfItem.channelTag != null && s.channel !== wfItem.channelTag) {
+            settingsToUpdate.channel = wfItem.channelTag;
+          }
+        }
+      }
+
+      // Fallback to crate/amc/channel
+      if (!wfItem) {
+        wfItem = list.find(
+          item =>
+            item.crateNum === s.crate &&
+            item.amcNum === s.amcSlot &&
+            item.channelTag === s.channel &&
+            item.trace
+        );
+
+        if (wfItem) {
+          // Update detector/subdetector from matched item
+          if (wfItem.detectorSystem && s.detectorSystem !== wfItem.detectorSystem) {
+            settingsToUpdate.detectorSystem = wfItem.detectorSystem;
+          }
+          if (wfItem.subdetector && s.subdetector !== wfItem.subdetector) {
+            settingsToUpdate.subdetector = wfItem.subdetector;
+          }
+        }
+      }
+
+      // Only update settings if there are actual changes
+      if (Object.keys(settingsToUpdate).length > 0 && typeof this.props.onSettingsCorrected === 'function') {
+        const newSettings = { ...s, ...settingsToUpdate };
+        console.log(`[${this.id || 'WFD5Waveform'}] Auto-syncing settings:`, settingsToUpdate);
+        // Use setTimeout to avoid updating during render
+        setTimeout(() => this.props.onSettingsCorrected(newSettings), 0);
+      }
+
       if (!wfItem?.trace) return { data: [], layout: { title: 'No matching trace', autosize: true } };
 
       let processedTrace = [...wfItem.trace];
