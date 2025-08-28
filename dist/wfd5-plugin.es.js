@@ -368,7 +368,7 @@ function makeWFD5IntegralHistogram(_ref) {
         return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5IntegralHistogram, "settingSchema", this)), {}, {
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -747,7 +747,7 @@ function makeWFD5HodoscopePositionHistogram(_ref) {
         return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5HodoscopePositionHistogram, "settingSchema", this)), {}, {
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://localhost:3001/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
+            "default": 'http://localhost:3000/api/json_path?last=1&json_path=/data_products/HodoscopePositionHistogram',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -1095,7 +1095,7 @@ function makeWFD5Waveform(_ref) {
         return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5Waveform, "settingSchema", this)), {}, {
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -2073,7 +2073,7 @@ function makeWFD5LysoArrayHistograms(_ref) {
           },
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5TraceIntegralHistogramCollection',
             label: 'Data URL',
             advanced: true
           },
@@ -2684,7 +2684,7 @@ function makeWFD5LysoArrayWaveforms(_ref) {
         return _objectSpread2(_objectSpread2({}, _superPropGet(WFD5LysoArrayWaveforms, "settingSchema", this)), {}, {
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
@@ -3056,7 +3056,7 @@ function makeWFD5WaveformTraceOnly(_ref) {
           // Data URL
           dataUrl: {
             type: SettingTypes.STRING,
-            "default": 'http://127.0.0.1:3001/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
+            "default": 'http://127.0.0.1:3000/api/json_path?last=1&json_path=/data_products/WFD5WaveformCollection',
             label: 'Data URL',
             onChange: 'onUpdateTick',
             advanced: true
